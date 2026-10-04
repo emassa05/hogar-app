@@ -71,11 +71,12 @@ class ProfileService:
     ) -> RestrictionResponse:
         target_name = self._target_name(request.target)
         membership, _ = await self._load(context, context.user.id)
+        starts_on = self._start_date(context, request)
         restriction = Restriction(
             target_type=request.target.type,
             target_key=request.target.key,
             kind=request.kind,
-            starts_on=request.starts_on or today_in(context.household.timezone),
+            starts_on=starts_on,
             ends_on=request.ends_on,
             created_at=utc_now(),
         )
@@ -90,10 +91,11 @@ class ProfileService:
         target_name = self._target_name(request.target)
         membership, _ = await self._load(context, context.user.id)
         restriction = self._owned_restriction(membership, restriction_id)
+        starts_on = self._start_date(context, request)
         restriction.target_type = request.target.type
         restriction.target_key = request.target.key
         restriction.kind = request.kind
-        restriction.starts_on = request.starts_on or restriction.starts_on
+        restriction.starts_on = starts_on
         restriction.ends_on = request.ends_on
         self._ensure_no_overlap(context, membership, restriction)
         await self.session.commit()
@@ -181,6 +183,15 @@ class ProfileService:
         return entry.name
 
     @staticmethod
+    def _start_date(context: HouseholdContext, request: RestrictionInput) -> date:
+        starts_on = request.starts_on or today_in(context.household.timezone)
+        if request.ends_on is not None and request.ends_on < starts_on:
+            raise ValidationFailedError.single(
+                "body.ends_on", "out_of_range", "End date must not precede the start date."
+            )
+        return starts_on
+
+    @staticmethod
     def _owned_restriction(membership: Membership, restriction_id: uuid.UUID) -> Restriction:
         for restriction in membership.restrictions:
             if restriction.id == restriction_id:
@@ -197,7 +208,7 @@ class ProfileService:
                 existing is not candidate
                 and existing.target_type is candidate.target_type
                 and existing.target_key == candidate.target_key
-                and (existing.ends_on is None or existing.ends_on >= today)
+                and is_active(existing, today)
             ):
                 raise ConflictError(message="An active restriction already targets this item.")
 
