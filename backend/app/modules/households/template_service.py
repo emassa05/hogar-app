@@ -55,7 +55,6 @@ class TemplateService:
             await self.households.add_template_application(application)
         except IntegrityError as error:
             raise templates_already_applied() from error
-        await self.session.commit()
         return await self._response(context, application)
 
     async def _response(

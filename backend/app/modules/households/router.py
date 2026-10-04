@@ -217,6 +217,7 @@ async def apply_templates(
     context: HouseholdAccess,
     session: SessionDependency,
 ) -> TemplateApplicationResponse:
+    context.require_admin()
     return await run_idempotent(
         session,
         user_id=context.user.id,

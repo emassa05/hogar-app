@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.exc import StaleDataError
 
 from app.common.clock import utc_now
 from app.common.config import Settings
@@ -60,7 +61,7 @@ class HouseholdService:
         )
         await self._new_invitation(household.id, user.id)
         user.active_household_id = household.id
-        await self.session.commit()
+        await self.session.flush()
         await self.session.refresh(household)
         return await self.detail(household, membership, user)
 
@@ -96,7 +97,16 @@ class HouseholdService:
             )
         for field, value in request.model_dump(exclude_unset=True, exclude={"version"}).items():
             setattr(household, field, value)
-        await self.session.commit()
+        try:
+            await self.session.commit()
+        except StaleDataError as error:
+            await self.session.rollback()
+            await self.session.refresh(household)
+            raise PreconditionFailedError(
+                ErrorCode.VERSION_CONFLICT,
+                "Household was modified by someone else.",
+                details={"current_version": household.version},
+            ) from error
         await self.session.refresh(household)
         return await self.detail(household, context.membership, context.user)
 
