@@ -49,6 +49,7 @@ class HouseholdRepository:
         member_count = (
             select(func.count(Membership.id))
             .where(Membership.household_id == Household.id, Membership.left_at.is_(None))
+            .correlate(Household)
             .scalar_subquery()
         )
         rows = await self.session.execute(
