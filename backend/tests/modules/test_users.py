@@ -1,6 +1,6 @@
 from httpx import AsyncClient
 
-from tests.factories import RegisteredUser
+from tests.factories import RegisteredUser, create_household
 
 
 async def test_update_name_and_avatar(client: AsyncClient, marta: RegisteredUser) -> None:
@@ -51,3 +51,36 @@ async def test_foreign_active_household_is_not_found(
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "HOUSEHOLD_NOT_FOUND"
+
+
+async def test_update_active_household_to_own_household(
+    client: AsyncClient, marta: RegisteredUser
+) -> None:
+    first = await create_household(client, marta)
+    await create_household(client, marta, name="Otra casa")
+
+    response = await client.patch(
+        "/users/me", json={"active_household_id": first["id"]}, headers=marta.headers
+    )
+
+    assert response.status_code == 200
+    assert response.json()["active_household_id"] == first["id"]
+    assert (await client.get("/users/me", headers=marta.headers)).json()[
+        "active_household_id"
+    ] == first["id"]
+
+
+async def test_update_active_household_rejects_existing_foreign_household(
+    client: AsyncClient, marta: RegisteredUser, pablo: RegisteredUser
+) -> None:
+    household = await create_household(client, pablo)
+
+    response = await client.patch(
+        "/users/me", json={"active_household_id": household["id"]}, headers=marta.headers
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "HOUSEHOLD_NOT_FOUND"
+    assert (await client.get("/users/me", headers=marta.headers)).json()[
+        "active_household_id"
+    ] is None

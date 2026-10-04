@@ -1,4 +1,5 @@
 import re
+import uuid
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -77,3 +78,54 @@ async def register_user(
     )
     assert response.status_code == 201, response.text
     return RegisteredUser(phone=phone, password=password, body=response.json())
+
+
+def idempotency_headers(user: RegisteredUser, key: str | None = None) -> dict[str, str]:
+    return {**user.headers, "Idempotency-Key": key or str(uuid.uuid4())}
+
+
+async def create_household(
+    client: AsyncClient,
+    user: RegisteredUser,
+    name: str = "Casa Los Robles",
+    timezone: str = "America/Santiago",
+) -> dict[str, Any]:
+    response = await client.post(
+        "/households",
+        json={"name": name, "timezone": timezone},
+        headers=idempotency_headers(user),
+    )
+    assert response.status_code == 201, response.text
+    return dict(response.json())
+
+
+async def get_invitation_code(client: AsyncClient, admin: RegisteredUser, household_id: str) -> str:
+    response = await client.get(f"/households/{household_id}/invitation", headers=admin.headers)
+    assert response.status_code == 200, response.text
+    return str(response.json()["code"])
+
+
+async def join_household(
+    client: AsyncClient, user: RegisteredUser, admin: RegisteredUser, household_id: str
+) -> dict[str, Any]:
+    code = await get_invitation_code(client, admin, household_id)
+    response = await client.post(f"/invitations/{code}/accept", headers=user.headers)
+    assert response.status_code == 201, response.text
+    return dict(response.json())
+
+
+async def create_restriction(
+    client: AsyncClient,
+    user: RegisteredUser,
+    household_id: str,
+    target_type: str = "activity",
+    key: str = "cook",
+    **values: object,
+) -> dict[str, Any]:
+    response = await client.post(
+        f"/households/{household_id}/members/me/restrictions",
+        json={"target": {"type": target_type, "key": key}, "kind": "permanent", **values},
+        headers=user.headers,
+    )
+    assert response.status_code == 201, response.text
+    return dict(response.json())

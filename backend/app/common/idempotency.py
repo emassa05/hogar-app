@@ -7,7 +7,7 @@ from typing import Annotated, Any
 
 from fastapi import Header
 from pydantic import BaseModel
-from sqlalchemy import JSON, String, UniqueConstraint, delete, select
+from sqlalchemy import JSON, String, UniqueConstraint, delete, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
@@ -48,6 +48,10 @@ async def run_idempotent[ResponseT: BaseModel](
     response_model: type[ResponseT],
     operation: Callable[[], Awaitable[ResponseT]],
 ) -> ResponseT:
+    lock_id = int.from_bytes(
+        hashlib.sha256(f"{user_id}:{scope}:{key}".encode()).digest()[:8], signed=True
+    )
+    await session.execute(text("SELECT pg_advisory_xact_lock(:lock_id)"), {"lock_id": lock_id})
     request_hash = fingerprint(request_payload)
     existing = await session.scalar(
         select(IdempotencyRecord).where(
@@ -77,8 +81,16 @@ async def run_idempotent[ResponseT: BaseModel](
             response_body=response.model_dump(mode="json"),
             created_at=utc_now(),
         )
-        .on_conflict_do_nothing()
+        .on_conflict_do_update(
+            index_elements=["user_id", "scope", "key"],
+            set_={
+                "request_hash": request_hash,
+                "response_body": response.model_dump(mode="json"),
+                "created_at": utc_now(),
+            },
+        )
     )
+    await session.commit()
     return response
 
 

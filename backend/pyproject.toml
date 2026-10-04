@@ -67,4 +67,5 @@ addopts = "-ra --strict-markers"
 
 [tool.coverage.run]
 branch = true
+concurrency = ["greenlet", "thread"]
 source = ["app"]
