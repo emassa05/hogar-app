@@ -82,7 +82,3 @@ El sistema deberá ofrecer plantillas opcionales de tareas y rutinas para difere
 El sistema deberá permitir que el hogar establezca la disponibilidad o capacidad esperada de cada integrante, para calcular una distribución equilibrada según sus circunstancias.
 
 El equilibrio no deberá asumir necesariamente que todos los integrantes realizan la misma cantidad de tareas.
-
-## RF19. Privacidad y visibilidad de la información
-
-El sistema deberá permitir definir qué información es visible para todos los integrantes y cuál queda restringida a usuarios determinados, especialmente cuando se trate de información relacionada con salud o cuidados.
