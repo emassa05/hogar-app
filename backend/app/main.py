@@ -12,6 +12,7 @@ from app.common.logging import configure_logging
 from app.common.rate_limit import init_rate_limiter
 from app.common.request_context import REQUEST_ID_HEADER, RequestIdMiddleware
 from app.common.schemas import ErrorResponse
+from app.common.sms import build_sms_sender
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -23,6 +24,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         database = init_database(settings)
         init_rate_limiter(settings)
         app.state.settings = settings
+        app.state.sms_sender = build_sms_sender(settings)
         try:
             yield
         finally:
