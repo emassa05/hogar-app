@@ -33,3 +33,24 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: assets/fonts/plus-jakarta-sans-400.ttf
+          weight: 400
+        - asset: assets/fonts/plus-jakarta-sans-500.ttf
+          weight: 500
+        - asset: assets/fonts/plus-jakarta-sans-600.ttf
+          weight: 600
+        - asset: assets/fonts/plus-jakarta-sans-800.ttf
+          weight: 800
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/jetbrains-mono-500.ttf
+          weight: 500
+        - asset: assets/fonts/jetbrains-mono-600.ttf
+          weight: 600
+    - family: Instrument Serif
+      fonts:
+        - asset: assets/fonts/instrument-serif-italic.ttf
+          style: italic
