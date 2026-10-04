@@ -7,13 +7,25 @@ enum VerificationPurpose { registration, passwordReset }
 
 @immutable
 class PhoneVerification {
-  const PhoneVerification({required this.id, required this.phone, required this.purpose, required this.expiresAt, required this.resendAvailableAt});
+  const PhoneVerification({
+    required this.id,
+    required this.phone,
+    required this.purpose,
+    required this.expiresAt,
+    required this.resendAvailableAt,
+  });
   final String id;
   final String phone;
   final VerificationPurpose purpose;
   final DateTime expiresAt;
   final DateTime resendAvailableAt;
-  PhoneVerification withResendAt(DateTime date) => PhoneVerification(id: id, phone: phone, purpose: purpose, expiresAt: expiresAt, resendAvailableAt: date);
+  PhoneVerification withResendAt(DateTime date) => PhoneVerification(
+    id: id,
+    phone: phone,
+    purpose: purpose,
+    expiresAt: expiresAt,
+    resendAvailableAt: date,
+  );
 }
 
 @immutable

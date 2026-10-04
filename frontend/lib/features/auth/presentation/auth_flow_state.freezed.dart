@@ -1,6 +1,4 @@
-
 part of 'auth_flow_state.dart';
-
 
 T _$identity<T>(T value) => value;
 
@@ -73,48 +71,27 @@ class _$AuthFlowStateCopyWithImpl<$Res, $Val extends AuthFlowState>
       _value.copyWith(
             purpose: null == purpose
                 ? _value.purpose
-                : purpose
-                      as VerificationPurpose,
+                : purpose as VerificationPurpose,
             verification: freezed == verification
                 ? _value.verification
-                : verification
-                      as PhoneVerification?,
+                : verification as PhoneVerification?,
             proof: freezed == proof
                 ? _value.proof
-                : proof
-                      as VerificationProof?,
-            password: null == password
-                ? _value.password
-                : password
-                      as String,
-            name: null == name
-                ? _value.name
-                : name
-                      as String,
-            avatar: freezed == avatar
-                ? _value.avatar
-                : avatar
-                      as AvatarChoice?,
-            busy: null == busy
-                ? _value.busy
-                : busy
-                      as bool,
+                : proof as VerificationProof?,
+            password: null == password ? _value.password : password as String,
+            name: null == name ? _value.name : name as String,
+            avatar: freezed == avatar ? _value.avatar : avatar as AvatarChoice?,
+            busy: null == busy ? _value.busy : busy as bool,
             accountCreated: null == accountCreated
                 ? _value.accountCreated
-                : accountCreated
-                      as bool,
+                : accountCreated as bool,
             errorPulse: null == errorPulse
                 ? _value.errorPulse
-                : errorPulse
-                      as int,
+                : errorPulse as int,
             blockedUntil: freezed == blockedUntil
                 ? _value.blockedUntil
-                : blockedUntil
-                      as DateTime?,
-            error: freezed == error
-                ? _value.error
-                : error
-                      as AppException?,
+                : blockedUntil as DateTime?,
+            error: freezed == error ? _value.error : error as AppException?,
           )
           as $Val,
     );
@@ -171,53 +148,27 @@ class __$$AuthFlowStateImplCopyWithImpl<$Res>
       _$AuthFlowStateImpl(
         purpose: null == purpose
             ? _value.purpose
-            : purpose
-                  as VerificationPurpose,
+            : purpose as VerificationPurpose,
         verification: freezed == verification
             ? _value.verification
-            : verification
-                  as PhoneVerification?,
-        proof: freezed == proof
-            ? _value.proof
-            : proof
-                  as VerificationProof?,
-        password: null == password
-            ? _value.password
-            : password
-                  as String,
-        name: null == name
-            ? _value.name
-            : name
-                  as String,
-        avatar: freezed == avatar
-            ? _value.avatar
-            : avatar
-                  as AvatarChoice?,
-        busy: null == busy
-            ? _value.busy
-            : busy
-                  as bool,
+            : verification as PhoneVerification?,
+        proof: freezed == proof ? _value.proof : proof as VerificationProof?,
+        password: null == password ? _value.password : password as String,
+        name: null == name ? _value.name : name as String,
+        avatar: freezed == avatar ? _value.avatar : avatar as AvatarChoice?,
+        busy: null == busy ? _value.busy : busy as bool,
         accountCreated: null == accountCreated
             ? _value.accountCreated
-            : accountCreated
-                  as bool,
-        errorPulse: null == errorPulse
-            ? _value.errorPulse
-            : errorPulse
-                  as int,
+            : accountCreated as bool,
+        errorPulse: null == errorPulse ? _value.errorPulse : errorPulse as int,
         blockedUntil: freezed == blockedUntil
             ? _value.blockedUntil
-            : blockedUntil
-                  as DateTime?,
-        error: freezed == error
-            ? _value.error
-            : error
-                  as AppException?,
+            : blockedUntil as DateTime?,
+        error: freezed == error ? _value.error : error as AppException?,
       ),
     );
   }
 }
-
 
 class _$AuthFlowStateImpl implements _AuthFlowState {
   const _$AuthFlowStateImpl({

@@ -1,6 +1,4 @@
-
 part of 'auth_dtos.dart';
-
 
 T _$identity<T>(T value) => value;
 
@@ -64,24 +62,15 @@ class _$PhoneVerificationDtoCopyWithImpl<
       _value.copyWith(
             verificationId: null == verificationId
                 ? _value.verificationId
-                : verificationId
-                      as String,
-            phone: null == phone
-                ? _value.phone
-                : phone
-                      as String,
-            purpose: null == purpose
-                ? _value.purpose
-                : purpose
-                      as String,
+                : verificationId as String,
+            phone: null == phone ? _value.phone : phone as String,
+            purpose: null == purpose ? _value.purpose : purpose as String,
             expiresAt: null == expiresAt
                 ? _value.expiresAt
-                : expiresAt
-                      as DateTime,
+                : expiresAt as DateTime,
             resendAvailableAt: null == resendAvailableAt
                 ? _value.resendAvailableAt
-                : resendAvailableAt
-                      as DateTime,
+                : resendAvailableAt as DateTime,
           )
           as $Val,
     );
@@ -126,29 +115,17 @@ class __$$PhoneVerificationDtoImplCopyWithImpl<$Res>
       _$PhoneVerificationDtoImpl(
         verificationId: null == verificationId
             ? _value.verificationId
-            : verificationId
-                  as String,
-        phone: null == phone
-            ? _value.phone
-            : phone
-                  as String,
-        purpose: null == purpose
-            ? _value.purpose
-            : purpose
-                  as String,
-        expiresAt: null == expiresAt
-            ? _value.expiresAt
-            : expiresAt
-                  as DateTime,
+            : verificationId as String,
+        phone: null == phone ? _value.phone : phone as String,
+        purpose: null == purpose ? _value.purpose : purpose as String,
+        expiresAt: null == expiresAt ? _value.expiresAt : expiresAt as DateTime,
         resendAvailableAt: null == resendAvailableAt
             ? _value.resendAvailableAt
-            : resendAvailableAt
-                  as DateTime,
+            : resendAvailableAt as DateTime,
       ),
     );
   }
 }
-
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _$PhoneVerificationDtoImpl extends _PhoneVerificationDto {
@@ -287,12 +264,10 @@ class _$VerificationTokenDtoCopyWithImpl<
       _value.copyWith(
             verificationToken: null == verificationToken
                 ? _value.verificationToken
-                : verificationToken
-                      as String,
+                : verificationToken as String,
             expiresAt: null == expiresAt
                 ? _value.expiresAt
-                : expiresAt
-                      as DateTime,
+                : expiresAt as DateTime,
           )
           as $Val,
     );
@@ -325,17 +300,12 @@ class __$$VerificationTokenDtoImplCopyWithImpl<$Res>
       _$VerificationTokenDtoImpl(
         verificationToken: null == verificationToken
             ? _value.verificationToken
-            : verificationToken
-                  as String,
-        expiresAt: null == expiresAt
-            ? _value.expiresAt
-            : expiresAt
-                  as DateTime,
+            : verificationToken as String,
+        expiresAt: null == expiresAt ? _value.expiresAt : expiresAt as DateTime,
       ),
     );
   }
 }
-
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _$VerificationTokenDtoImpl extends _VerificationTokenDto {
@@ -443,14 +413,8 @@ class _$AuthSessionDtoCopyWithImpl<$Res, $Val extends AuthSessionDto>
   $Res call({Object? user = null, Object? tokens = null}) {
     return _then(
       _value.copyWith(
-            user: null == user
-                ? _value.user
-                : user
-                      as SessionUser,
-            tokens: null == tokens
-                ? _value.tokens
-                : tokens
-                      as TokenPair,
+            user: null == user ? _value.user : user as SessionUser,
+            tokens: null == tokens ? _value.tokens : tokens as TokenPair,
           )
           as $Val,
     );
@@ -502,19 +466,12 @@ class __$$AuthSessionDtoImplCopyWithImpl<$Res>
   $Res call({Object? user = null, Object? tokens = null}) {
     return _then(
       _$AuthSessionDtoImpl(
-        user: null == user
-            ? _value.user
-            : user
-                  as SessionUser,
-        tokens: null == tokens
-            ? _value.tokens
-            : tokens
-                  as TokenPair,
+        user: null == user ? _value.user : user as SessionUser,
+        tokens: null == tokens ? _value.tokens : tokens as TokenPair,
       ),
     );
   }
 }
-
 
 @JsonSerializable(explicitToJson: true)
 class _$AuthSessionDtoImpl extends _AuthSessionDto {

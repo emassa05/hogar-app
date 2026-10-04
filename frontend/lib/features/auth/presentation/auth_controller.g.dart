@@ -1,6 +1,4 @@
-
 part of 'auth_controller.dart';
-
 
 String _$authControllerHash() => r'bdc8879cba16e964b0619a6ddf0ddb060c756efb';
 

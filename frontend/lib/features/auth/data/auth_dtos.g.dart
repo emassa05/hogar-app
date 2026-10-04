@@ -1,6 +1,4 @@
-
 part of 'auth_dtos.dart';
-
 
 _$PhoneVerificationDtoImpl _$$PhoneVerificationDtoImplFromJson(
   Map<String, dynamic> json,

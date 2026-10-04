@@ -1,6 +1,4 @@
-
 part of 'session_bootstrap.dart';
-
 
 String _$sessionBootstrapHash() => r'250c2350bd447148a1b1b82b5f7abb65eeea1e22';
 

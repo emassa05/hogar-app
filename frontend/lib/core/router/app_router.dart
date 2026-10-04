@@ -3,9 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/auth/domain/auth_entities.dart';
+import '../../features/auth/presentation/auth_controller.dart';
+import '../../features/auth/presentation/screens/account_created_screen.dart';
+import '../../features/auth/presentation/screens/character_screen.dart';
+import '../../features/auth/presentation/screens/code_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/name_screen.dart';
+import '../../features/auth/presentation/screens/password_screen.dart';
+import '../../features/auth/presentation/screens/phone_screen.dart';
+import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../l10n/app_strings.dart';
 import '../session/session_controller.dart';
 import '../session/session_state.dart';
+import '../validation/validators.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/step_header.dart';
 import 'route_names.dart';
@@ -16,6 +27,7 @@ part 'app_router.g.dart';
 GoRouter appRouter(Ref ref) {
   final refresh = _RouterRefresh();
   ref.listen(sessionControllerProvider, (previous, next) => refresh.update());
+  ref.listen(authControllerProvider, (previous, next) => refresh.update());
   final routes = <String, (String, String)>{
     RouteNames.welcome: ('/', AppStrings.appName),
     RouteNames.registerPhone: ('/register/phone', AppStrings.register),
@@ -61,34 +73,84 @@ GoRouter appRouter(Ref ref) {
   };
   final router = GoRouter(
     refreshListenable: refresh,
-    redirect: (context, state) {
+    redirect: (context, location) {
       final session = ref.read(sessionControllerProvider);
+      final flow = ref.read(authControllerProvider);
+      final path = location.uri.path;
       if (session.status == SessionStatus.restoring) return null;
-      final protected =
-          state.uri.path.startsWith('/households') || state.uri.path == '/home';
-      if (!session.isAuthenticated && protected) return '/';
-      if (session.isAuthenticated &&
-          !protected &&
-          state.uri.path != '/account-created') {
-        return session.user?.activeHouseholdId == null
-            ? '/households/start'
-            : '/home';
+      final protected = path.startsWith('/households') || path == '/home';
+      final destination = session.user?.activeHouseholdId == null
+          ? '/households/start'
+          : '/home';
+      if (!session.isAuthenticated &&
+          (protected || path == '/account-created')) {
+        return '/';
+      }
+      if (session.isAuthenticated && !protected) {
+        if (flow.accountCreated) {
+          return path == '/account-created' ? null : '/account-created';
+        }
+        return destination;
+      }
+      if (path.startsWith('/register/') && path != '/register/phone') {
+        if (flow.purpose != VerificationPurpose.registration ||
+            flow.verification == null) {
+          return '/register/phone';
+        }
+        if (path != '/register/code' && flow.proof == null) {
+          return '/register/phone';
+        }
+        if ((path == '/register/name' || path == '/register/character') &&
+            PasswordValidator.validate(flow.password) != null) {
+          return '/register/password';
+        }
+        if (path == '/register/character' &&
+            NameValidator.validate(flow.name) != null) {
+          return '/register/name';
+        }
+      }
+      if (path == '/recover/code' &&
+          (flow.purpose != VerificationPurpose.passwordReset ||
+              flow.verification == null)) {
+        return '/recover/phone';
+      }
+      if (path == '/recover/password' &&
+          (flow.purpose != VerificationPurpose.passwordReset ||
+              flow.proof == null)) {
+        return '/recover/phone';
       }
       return null;
     },
+    errorBuilder: (context, state) =>
+        const AppScaffold(child: Text(AppStrings.foundation)),
     routes: routes.entries
         .map(
           (entry) => GoRoute(
             name: entry.key,
             path: entry.value.$1,
-            builder: (context, state) => AppScaffold(
-              header: StepHeader(title: entry.value.$2),
-              child: Text(
-                entry.key == RouteNames.home
-                    ? AppStrings.comingSoon
-                    : AppStrings.foundation,
+            builder: (context, state) => switch (entry.key) {
+              RouteNames.welcome => const WelcomeScreen(),
+              RouteNames.registerPhone => const PhoneScreen(),
+              RouteNames.registerCode => const CodeScreen(),
+              RouteNames.registerPassword => const PasswordScreen(),
+              RouteNames.registerName => const NameScreen(),
+              RouteNames.registerCharacter => const CharacterScreen(),
+              RouteNames.accountCreated => const AccountCreatedScreen(),
+              RouteNames.login => const LoginScreen(),
+              RouteNames.recoverPhone => const PhoneScreen(recovery: true),
+              RouteNames.recoverCode => const CodeScreen(recovery: true),
+              RouteNames.recoverPassword => const PasswordScreen(
+                recovery: true,
               ),
-            ),
+              _ => AppScaffold(
+                header: StepHeader(title: entry.value.$2),
+                child: Text(
+                  entry.key == RouteNames.home
+                      ? AppStrings.comingSoon
+                      : AppStrings.foundation,
+                ),
+              ),
+            },
           ),
         )
         .toList(),
