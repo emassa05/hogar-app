@@ -1,6 +1,6 @@
 part of 'token_storage.dart';
 
-String _$tokenStorageHash() => r'9bf31c7d16f31bd343c659404a93bce78f1d6a2f';
+String _$tokenStorageHash() => r'b1d6c8bc15ddc53b621d238093321e8a28e153d4';
 
 @ProviderFor(tokenStorage)
 final tokenStorageProvider = Provider<TokenStorage>.internal(

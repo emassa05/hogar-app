@@ -1,6 +1,6 @@
 part of 'dio_client.dart';
 
-String _$dioClientHash() => r'a2701c840fe751ca06c46b92154588f7c8c84a00';
+String _$dioClientHash() => r'b8e7f304860744012bc56a70cc069a55fe9b1ea4';
 
 @ProviderFor(dioClient)
 final dioClientProvider = Provider<Dio>.internal(

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_config.g.dart';
@@ -15,4 +16,4 @@ class AppConfig {
 }
 
 @Riverpod(keepAlive: true)
-AppConfig appConfig(AppConfigRef ref) => const AppConfig();
+AppConfig appConfig(Ref ref) => const AppConfig();

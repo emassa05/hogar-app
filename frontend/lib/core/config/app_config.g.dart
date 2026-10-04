@@ -1,6 +1,6 @@
 part of 'app_config.dart';
 
-String _$appConfigHash() => r'c2cf4c47a445e3b4e93b1a993c54fca0f4f12cbb';
+String _$appConfigHash() => r'c018d55044c07de33e1763c45125c0e682b53da7';
 
 @ProviderFor(appConfig)
 final appConfigProvider = Provider<AppConfig>.internal(

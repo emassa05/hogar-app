@@ -1,6 +1,6 @@
 part of 'session_controller.dart';
 
-String _$sessionControllerHash() => r'78d47b9564beeff6dba3064317ab93d0a6716c20';
+String _$sessionControllerHash() => r'd35b7c93e849f13aebab92b0be623a3720bf337e';
 
 @ProviderFor(SessionController)
 final sessionControllerProvider =

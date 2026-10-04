@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../config/app_config.dart';
@@ -11,7 +12,7 @@ import 'request_id_interceptor.dart';
 part 'dio_client.g.dart';
 
 @Riverpod(keepAlive: true)
-Dio dioClient(DioClientRef ref) {
+Dio dioClient(Ref ref) {
   final config = ref.watch(appConfigProvider);
   final base = BaseOptions(
     baseUrl: config.apiBaseUrl,

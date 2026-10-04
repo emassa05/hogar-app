@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -45,7 +46,7 @@ class SecureTokenStorage implements TokenStorage {
 }
 
 @Riverpod(keepAlive: true)
-TokenStorage tokenStorage(TokenStorageRef ref) => const SecureTokenStorage(
+TokenStorage tokenStorage(Ref ref) => const SecureTokenStorage(
   FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   ),
