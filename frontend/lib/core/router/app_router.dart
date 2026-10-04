@@ -13,6 +13,15 @@ import '../../features/auth/presentation/screens/name_screen.dart';
 import '../../features/auth/presentation/screens/password_screen.dart';
 import '../../features/auth/presentation/screens/phone_screen.dart';
 import '../../features/auth/presentation/screens/welcome_screen.dart';
+import '../../features/households/presentation/screens/home_placeholder_screen.dart';
+import '../../features/households/presentation/screens/household_choice_screen.dart';
+import '../../features/households/presentation/screens/household_create_screen.dart';
+import '../../features/households/presentation/screens/household_invite_screen.dart';
+import '../../features/households/presentation/screens/household_join_screen.dart';
+import '../../features/profile/presentation/screens/availability_screen.dart';
+import '../../features/profile/presentation/screens/preferences_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/templates/presentation/screens/templates_screen.dart';
 import '../l10n/app_strings.dart';
 import '../session/session_controller.dart';
 import '../session/session_state.dart';
@@ -142,13 +151,28 @@ GoRouter appRouter(Ref ref) {
               RouteNames.recoverPassword => const PasswordScreen(
                 recovery: true,
               ),
+              RouteNames.householdChoice => const HouseholdChoiceScreen(),
+              RouteNames.householdCreate => const HouseholdCreateScreen(),
+              RouteNames.householdJoin => const HouseholdJoinScreen(),
+              RouteNames.householdInvite => HouseholdInviteScreen(
+                householdId: state.pathParameters['householdId']!,
+              ),
+              RouteNames.householdProfile => ProfileScreen(
+                householdId: state.pathParameters['householdId']!,
+              ),
+              RouteNames.householdAvailability => AvailabilityScreen(
+                householdId: state.pathParameters['householdId']!,
+              ),
+              RouteNames.householdPreferences => PreferencesScreen(
+                householdId: state.pathParameters['householdId']!,
+              ),
+              RouteNames.householdTemplates => TemplatesScreen(
+                householdId: state.pathParameters['householdId']!,
+              ),
+              RouteNames.home => const HomePlaceholderScreen(),
               _ => AppScaffold(
                 header: StepHeader(title: entry.value.$2),
-                child: Text(
-                  entry.key == RouteNames.home
-                      ? AppStrings.comingSoon
-                      : AppStrings.foundation,
-                ),
+                child: const Text(AppStrings.foundation),
               ),
             },
           ),

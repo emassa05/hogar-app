@@ -1,6 +1,6 @@
 part of 'app_router.dart';
 
-String _$appRouterHash() => r'3f282cfcd8682602a5853c09fc4830a9701d7567';
+String _$appRouterHash() => r'65bf840d2a4d67183e853fc04fb303dbd45b72e0';
 
 @ProviderFor(appRouter)
 final appRouterProvider = Provider<GoRouter>.internal(
