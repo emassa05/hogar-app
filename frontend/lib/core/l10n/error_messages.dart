@@ -66,7 +66,7 @@ abstract final class ErrorMessages {
     ApiErrorCode.templatesAlreadyApplied =>
       'Este hogar ya eligió sus plantillas.',
     ApiErrorCode.versionConflict =>
-      'Otra persona cambió estos datos. Recargamos la versión actual.',
+      'Otra persona cambió estos datos. Revisa la versión actual antes de guardar.',
     ApiErrorCode.idempotencyKeyReused =>
       'Esta acción cambió. Vuelve a intentarlo.',
     ApiErrorCode.validationError =>
