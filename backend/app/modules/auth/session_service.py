@@ -61,12 +61,12 @@ class SessionService:
         await self.session.commit()
         return tokens
 
-    async def logout(self, refresh_token: str, user_id: uuid.UUID) -> None:
+    async def logout(self, refresh_token: str) -> None:
         stored = await self.sessions.get_refresh_token_for_update(hash_opaque_token(refresh_token))
         if stored is None:
             return
         auth_session = await self.sessions.get_session_for_update(stored.session_id)
-        if auth_session is not None and auth_session.user_id == user_id:
+        if auth_session is not None:
             await self.sessions.revoke_session(auth_session.id, utc_now())
             await self.session.commit()
 
