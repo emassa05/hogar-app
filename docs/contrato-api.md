@@ -572,13 +572,13 @@ Un inicio de sesión correcto reinicia el contador de intentos.
 | --- | --- |
 | `401 INVALID_REFRESH_TOKEN` | Inválido, expirado, revocado o reutilizado. La app cierra la sesión. |
 
-#### `POST /auth/logout`
+#### `POST /auth/logout` — Público
 
 ```json
 { "refresh_token": "q3Yt7..." }
 ```
 
-`204`. Revoca la sesión. Es idempotente: repetirlo también responde `204`.
+`204`. Solo requiere el `refresh_token` del cuerpo y revoca su sesión, aunque el token ya haya sido rotado. Es idempotente: repetirlo también responde `204`, incluso si el token es desconocido, expiró o la sesión ya fue revocada.
 
 #### `POST /auth/password-reset` — Público
 
