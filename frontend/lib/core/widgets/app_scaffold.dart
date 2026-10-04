@@ -92,18 +92,33 @@ class AppScaffold extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SafeArea(
-                  bottom: false,
-                  child: header == null
-                      ? const SizedBox.shrink()
-                      : _constrained(header!),
-                ),
+                if (_household)
+                  SafeArea(
+                    bottom: false,
+                    child: header == null
+                        ? const SizedBox.shrink()
+                        : _constrained(header!),
+                  ),
                 Expanded(
                   child: SingleChildScrollView(
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: bodyPadding ?? _defaultBodyPadding,
-                    child: _constrained(child),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (!_household)
+                          SafeArea(
+                            bottom: false,
+                            child: header == null
+                                ? const SizedBox.shrink()
+                                : _constrained(header!),
+                          ),
+                        Padding(
+                          padding: bodyPadding ?? _defaultBodyPadding,
+                          child: _constrained(child),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 if (footer != null) _footer(context),

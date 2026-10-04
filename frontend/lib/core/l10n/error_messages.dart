@@ -17,11 +17,17 @@ abstract final class ErrorMessages {
       :final retryAfterSeconds,
     ) =>
       code == ApiErrorCode.invalidCredentials && remainingAttempts != null
-          ? 'La contraseña no coincide con ese número. Te quedan $remainingAttempts intentos.'
+          ? 'La contraseña no coincide con ese número. ${attemptsLeft(remainingAttempts)}'
+          : code == ApiErrorCode.verificationCodeInvalid &&
+                remainingAttempts != null
+          ? 'El código no coincide. ${attemptsLeft(remainingAttempts)}'
           : code == ApiErrorCode.accountLocked && retryAfterSeconds != null
           ? 'La cuenta está bloqueada temporalmente. Espera antes de volver a entrar.'
           : forCode(code),
   };
+
+  static String attemptsLeft(int count) =>
+      count == 1 ? 'Te queda 1 intento.' : 'Te quedan $count intentos.';
 
   static String forCode(ApiErrorCode code) => switch (code) {
     ApiErrorCode.verificationCodeInvalid =>

@@ -150,11 +150,13 @@ class InlineLinkText extends StatelessWidget {
     required this.prefix,
     required this.action,
     this.onPressed,
+    this.centered = true,
     super.key,
   });
   final String prefix;
   final String action;
   final VoidCallback? onPressed;
+  final bool centered;
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
@@ -166,7 +168,9 @@ class InlineLinkText extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadius.medium),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 48),
-        child: Center(
+        child: Align(
+          alignment: centered ? Alignment.center : Alignment.centerLeft,
+          widthFactor: centered ? null : 1,
           child: Text.rich(
             TextSpan(
               style: AppTypography.bodyMedium,
@@ -182,7 +186,7 @@ class InlineLinkText extends StatelessWidget {
                 ),
               ],
             ),
-            textAlign: TextAlign.center,
+            textAlign: centered ? TextAlign.center : TextAlign.start,
           ),
         ),
       ),
