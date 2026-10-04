@@ -1,0 +1,22 @@
+abstract final class RouteNames {
+  static const welcome = 'welcome';
+  static const registerPhone = 'register-phone';
+  static const registerCode = 'register-code';
+  static const registerPassword = 'register-password';
+  static const registerName = 'register-name';
+  static const registerCharacter = 'register-character';
+  static const accountCreated = 'account-created';
+  static const login = 'login';
+  static const recoverPhone = 'recover-phone';
+  static const recoverCode = 'recover-code';
+  static const recoverPassword = 'recover-password';
+  static const householdChoice = 'household-choice';
+  static const householdCreate = 'household-create';
+  static const householdInvite = 'household-invite';
+  static const householdProfile = 'household-profile';
+  static const householdAvailability = 'household-availability';
+  static const householdPreferences = 'household-preferences';
+  static const householdTemplates = 'household-templates';
+  static const householdJoin = 'household-join';
+  static const home = 'home';
+}
