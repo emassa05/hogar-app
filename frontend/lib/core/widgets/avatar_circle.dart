@@ -10,13 +10,24 @@ class AvatarCircle extends StatelessWidget {
     this.avatar,
     this.name = '',
     this.size = 48,
-    this.selected = false,
+    this.borderWidth = 0,
+    this.borderColor = AppColors.surface,
+    this.shadows,
+    this.background,
+    this.foreground = AppColors.categoryFourText,
+    this.semanticLabel,
     super.key,
   });
   final AvatarChoice? avatar;
   final String name;
   final double size;
-  final bool selected;
+  final double borderWidth;
+  final Color borderColor;
+  final List<BoxShadow>? shadows;
+  final Color? background;
+  final Color foreground;
+  final String? semanticLabel;
+
   static const colors = {
     AvatarChoice.indigo: Color(0xFFE0E5FD),
     AvatarChoice.green: Color(0xFFD6F7E4),
@@ -33,51 +44,78 @@ class AvatarCircle extends StatelessWidget {
     AvatarChoice.sky: 'celeste',
     AvatarChoice.pink: 'rosado',
   };
+
+  static String initialsOf(String name) => name
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((part) => part.isNotEmpty)
+      .take(2)
+      .map((part) => part.characters.first)
+      .join()
+      .toUpperCase();
+
+  Rect _imageRect(double inner) {
+    if (size >= 120) return Rect.fromLTWH(0, inner * 12 / 172, inner, inner);
+    if (borderWidth > 0) {
+      return Rect.fromLTWH(
+        -inner * 9 / 66,
+        inner * 3 / 66,
+        inner * 84 / 66,
+        inner * 84 / 66,
+      );
+    }
+    return Rect.fromLTWH(-inner * 0.1, inner * 0.1, inner * 1.2, inner * 1.2);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final initials = name
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .map((part) => part.characters.first)
-        .join()
-        .toUpperCase();
+    final inner = size - borderWidth * 2;
+    final initials = initialsOf(name);
+    final image = _imageRect(inner);
     return Semantics(
       image: true,
-      label: avatar == null
-          ? AppStrings.initials(name)
-          : AppStrings.character(names[avatar]!),
+      label:
+          semanticLabel ??
+          (avatar == null
+              ? AppStrings.initials(name)
+              : AppStrings.character(names[avatar]!)),
       child: Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: colors[avatar] ?? AppColors.brandSubtle,
-          border: Border.all(
-            color: selected ? AppColors.brand : AppColors.surface,
-            width: 3,
-          ),
+          color: background ?? colors[avatar] ?? colors[AvatarChoice.peach],
+          border: borderWidth == 0
+              ? null
+              : Border.all(color: borderColor, width: borderWidth),
+          boxShadow: shadows,
         ),
         child: ClipOval(
           child: avatar == null
               ? Center(
                   child: Text(
                     initials.isEmpty ? '?' : initials,
-                    style: AppTypography.titleLarge.copyWith(
-                      fontSize: size * 0.32,
-                      color: AppColors.brand,
-                    ),
                     textScaler: TextScaler.noScaling,
+                    style: AppTypography.display.copyWith(
+                      fontSize: size * 0.45,
+                      height: 1,
+                      letterSpacing: 0,
+                      color: foreground,
+                    ),
                   ),
                 )
-              : Transform.scale(
-                  scale: 1.17,
-                  child: Image.asset(
-                    'assets/images/avatars/avatar-${avatar!.name}.png',
-                    fit: BoxFit.cover,
-                    excludeFromSemantics: true,
-                  ),
+              : Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned.fromRect(
+                      rect: image,
+                      child: Image.asset(
+                        'assets/images/avatars/avatar-${avatar!.name}.png',
+                        fit: BoxFit.cover,
+                        excludeFromSemantics: true,
+                      ),
+                    ),
+                  ],
                 ),
         ),
       ),

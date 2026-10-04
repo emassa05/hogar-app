@@ -1,55 +1,87 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import '../theme/app_radius.dart';
 import '../theme/app_typography.dart';
+import 'app_icon.dart';
+
+enum BannerTone { info, warning, danger, success }
 
 class InfoBanner extends StatelessWidget {
   const InfoBanner({
     required this.message,
     this.title,
-    this.warning = false,
-    this.icon = Icons.info_outline,
+    this.tone = BannerTone.info,
+    this.icon = AppIcons.info,
+    this.action,
     super.key,
   });
   final String message;
   final String? title;
-  final bool warning;
-  final IconData icon;
+  final BannerTone tone;
+  final AppIcons icon;
+  final Widget? action;
+
+  Color get _background => switch (tone) {
+    BannerTone.info => AppColors.brandSubtle,
+    BannerTone.warning => AppColors.warningSubtle,
+    BannerTone.danger => AppColors.dangerSubtle,
+    BannerTone.success => AppColors.successSubtle,
+  };
+
+  Color get _accent => switch (tone) {
+    BannerTone.info => AppColors.brand,
+    BannerTone.warning => AppColors.warning,
+    BannerTone.danger => AppColors.danger,
+    BannerTone.success => AppColors.success,
+  };
+
+  Color get _iconColor => switch (tone) {
+    BannerTone.info => AppColors.iconBrand,
+    BannerTone.warning => AppColors.iconWarning,
+    BannerTone.danger => AppColors.iconDanger,
+    BannerTone.success => AppColors.iconSuccess,
+  };
+
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: warning ? AppColors.warningSubtle : AppColors.brandSubtle,
-      borderRadius: BorderRadius.circular(AppRadius.large),
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          icon,
-          size: 20,
-          color: warning ? AppColors.iconWarning : AppColors.brand,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (title != null) ...[
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    liveRegion: tone == BannerTone.danger,
+    child: Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: _background,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppIcon(icon, size: 20, color: _iconColor),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title != null) ...[
+                  Text(
+                    title!,
+                    style: AppTypography.labelLarge.copyWith(color: _accent),
+                  ),
+                  const SizedBox(height: 4),
+                ],
                 Text(
-                  title!,
-                  style: AppTypography.labelLarge.copyWith(
-                    color: warning ? AppColors.warning : AppColors.brand,
+                  message,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: tone == BannerTone.danger
+                        ? AppColors.danger
+                        : AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 6),
+                if (action != null) ...[const SizedBox(height: 4), action!],
               ],
-              Text(message, style: AppTypography.bodySmall),
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }

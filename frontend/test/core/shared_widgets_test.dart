@@ -6,10 +6,13 @@ import 'package:hogar_app/core/theme/app_theme.dart';
 import 'package:hogar_app/core/widgets/accent_title.dart';
 import 'package:hogar_app/core/widgets/app_buttons.dart';
 import 'package:hogar_app/core/widgets/app_scaffold.dart';
+import 'package:hogar_app/core/widgets/app_text_field.dart';
 import 'package:hogar_app/core/widgets/character_picker.dart';
 import 'package:hogar_app/core/widgets/otp_code_field.dart';
 import 'package:hogar_app/core/widgets/password_field.dart';
 import 'package:hogar_app/core/widgets/password_rules_checklist.dart';
+import 'package:hogar_app/core/widgets/phone_field.dart';
+import 'package:hogar_app/core/widgets/selectable_chip.dart';
 import 'package:hogar_app/core/widgets/step_header.dart';
 
 Widget harness(Widget child, {double scale = 1, bool reduced = false}) =>
@@ -42,12 +45,15 @@ void main() {
     expect(taps, 0);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.pumpWidget(
-      harness(const AppScaffold(child: SecondaryButton(label: 'Continuar'))),
+      harness(const AppScaffold(child: SecondaryButton(label: 'Compartir'))),
     );
-    expect(
-      tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
-      isNull,
+    final semantics = tester.widget<Semantics>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics && widget.properties.label == 'Compartir',
+      ),
     );
+    expect(semantics.properties.enabled, isFalse);
   });
   testWidgets('password visibility changes without losing input', (
     tester,
@@ -61,7 +67,7 @@ void main() {
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,
       isTrue,
     );
-    await tester.tap(find.byTooltip('Mostrar contraseÃ±a'));
+    await tester.tap(find.byTooltip('Mostrar contraseña'));
     await tester.pump();
     expect(
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,
@@ -101,7 +107,7 @@ void main() {
     );
     await tester.tap(find.bySemanticsLabel('Personaje verde'));
     expect(chosen, AvatarChoice.green);
-    expect(find.bySemanticsLabel('Personaje Ã­ndigo'), findsOneWidget);
+    expect(find.bySemanticsLabel('Personaje índigo'), findsOneWidget);
   });
   testWidgets('form actions remain reachable at 200 percent text scale', (
     tester,
@@ -126,7 +132,7 @@ void main() {
           ),
           child: const Column(
             children: [
-              AccentTitle(text: 'Crea una ', accent: 'contraseÃ±a'),
+              AccentTitle(text: 'Crea una ', accent: 'contraseña'),
               SizedBox(height: 20),
               PasswordField(),
               SizedBox(height: 20),
@@ -142,6 +148,87 @@ void main() {
     await tester.tap(find.text('Continuar'));
     expect(continued, isTrue);
     expect(tester.takeException(), isNull);
+  });
+  testWidgets('text field shows contract errors with danger styling', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      harness(
+        const AppScaffold(
+          child: AppTextField(
+            label: 'Nombre',
+            errorText: 'Usa un máximo de 40 caracteres.',
+            maxLength: 40,
+            showCounter: true,
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Usa un máximo de 40 caracteres.'), findsOneWidget);
+    expect(find.text('0/40'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Marta');
+    await tester.pump();
+    expect(find.text('5/40'), findsOneWidget);
+  });
+  testWidgets('phone field groups chilean mobile digits', (tester) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      harness(AppScaffold(child: PhoneField(controller: controller))),
+    );
+    await tester.enterText(find.byType(TextField), '+56987654321');
+    expect(controller.text, '9 8765 4321');
+    expect(find.bySemanticsLabel('Chile, código de país +56'), findsOneWidget);
+  });
+  testWidgets('chips expose toggled state and 48 dp targets', (tester) async {
+    var selected = false;
+    await tester.pumpWidget(
+      harness(
+        AppScaffold(
+          child: StatefulBuilder(
+            builder: (context, setState) => SelectableChip(
+              label: 'Cocinar',
+              selected: selected,
+              tone: ChipTone.success,
+              onSelected: (value) => setState(() => selected = value),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SelectableChip)).height, 48);
+    await tester.tap(find.text('Cocinar'));
+    await tester.pump();
+    expect(selected, isTrue);
+    final semantics = tester.widget<Semantics>(
+      find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == 'Cocinar',
+      ),
+    );
+    expect(semantics.properties.toggled, isTrue);
+  });
+  testWidgets('step header keeps a 48 dp back target and announces progress', (
+    tester,
+  ) async {
+    var back = 0;
+    await tester.pumpWidget(
+      harness(
+        AppScaffold(
+          header: StepHeader(
+            title: 'Crear cuenta',
+            step: 1,
+            total: 4,
+            onBack: () => back++,
+          ),
+          child: const SizedBox(),
+        ),
+      ),
+    );
+    final button = find.byType(HeaderIconButton);
+    expect(tester.getSize(button), const Size(48, 48));
+    await tester.tap(button);
+    expect(back, 1);
+    expect(find.bySemanticsLabel('Paso 1 de 4'), findsWidgets);
   });
   testWidgets('press feedback uses opacity when reduce motion is enabled', (
     tester,
