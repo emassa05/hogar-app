@@ -12,8 +12,9 @@ Future<void> main() async {
   for (final file in Directory(
     'lib',
   ).listSync(recursive: true).whereType<File>()) {
-    if (!file.path.endsWith('.g.dart') && !file.path.endsWith('.freezed.dart'))
+    if (!file.path.endsWith('.g.dart') && !file.path.endsWith('.freezed.dart')) {
       continue;
+    }
     final source = await file.readAsString();
     final withoutBlocks = source.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
     final clean = withoutBlocks

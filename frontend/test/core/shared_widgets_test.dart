@@ -120,6 +120,10 @@ void main() {
             total: 4,
             onBack: () {},
           ),
+          footer: PrimaryButton(
+            label: 'Continuar',
+            onPressed: () => continued = true,
+          ),
           child: const Column(
             children: [
               AccentTitle(text: 'Crea una ', accent: 'contraseÃ±a'),
@@ -128,10 +132,6 @@ void main() {
               SizedBox(height: 20),
               PasswordRulesChecklist(password: 'Segura12'),
             ],
-          ),
-          footer: PrimaryButton(
-            label: 'Continuar',
-            onPressed: () => continued = true,
           ),
         ),
         scale: 2,

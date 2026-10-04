@@ -49,8 +49,9 @@ class RefreshInterceptor extends Interceptor {
       final pair = failedToken != 'Bearer ${current.accessToken}'
           ? current
           : await _singleRefresh(expectedEpoch);
-      if (session.epoch != expectedEpoch || session.tokens == null)
+      if (session.epoch != expectedEpoch || session.tokens == null) {
         throw const UnauthenticatedException();
+      }
       final retry = options.copyWith(
         headers: {
           ...options.headers,
@@ -96,8 +97,9 @@ class RefreshInterceptor extends Interceptor {
         options: RequestOptionsFactory.public,
       );
       final pair = TokenPair.fromJson(response.data!);
-      if (!await session.replaceTokens(pair, expectedEpoch: expectedEpoch))
+      if (!await session.replaceTokens(pair, expectedEpoch: expectedEpoch)) {
         throw const UnauthenticatedException();
+      }
       return pair;
     } on DioException catch (error) {
       final mapped = ErrorMapper.map(error);

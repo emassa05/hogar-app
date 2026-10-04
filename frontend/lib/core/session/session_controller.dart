@@ -52,8 +52,9 @@ class SessionController extends _$SessionController implements SessionAccess {
   }
 
   void confirmUser(SessionUser user) {
-    if (_tokens != null)
+    if (_tokens != null) {
       state = SessionState(status: SessionStatus.authenticated, user: user);
+    }
   }
 
   @override
@@ -63,8 +64,9 @@ class SessionController extends _$SessionController implements SessionAccess {
   }) async {
     if (expectedEpoch != _epoch || _tokens == null) return false;
     await _persist(() async {
-      if (expectedEpoch == _epoch)
+      if (expectedEpoch == _epoch) {
         await ref.read(tokenStorageProvider).write(pair);
+      }
     });
     if (expectedEpoch != _epoch) return false;
     _tokens = pair;

@@ -26,8 +26,9 @@ class SecureTokenStorage implements TokenStorage {
       final json = jsonDecode(raw);
       if (json is! Map<String, dynamic>) throw const FormatException();
       final pair = TokenPair.fromJson(json);
-      if (pair.accessToken.isEmpty || pair.refreshToken.isEmpty)
+      if (pair.accessToken.isEmpty || pair.refreshToken.isEmpty) {
         throw const FormatException();
+      }
       return pair;
     } on Object {
       await clear();

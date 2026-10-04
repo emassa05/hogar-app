@@ -11,13 +11,16 @@ abstract final class ErrorMapper {
         exception.type == DioExceptionType.receiveTimeout) {
       return const NetworkException(NetworkFailure.timeout);
     }
-    if (exception.type == DioExceptionType.cancel)
+    if (exception.type == DioExceptionType.cancel) {
       return const NetworkException(NetworkFailure.cancelled);
-    if (exception.type == DioExceptionType.connectionError)
+    }
+    if (exception.type == DioExceptionType.connectionError) {
       return const NetworkException(NetworkFailure.disconnected);
+    }
     final response = exception.response;
-    if (response == null)
+    if (response == null) {
       return const NetworkException(NetworkFailure.disconnected);
+    }
     final data = response.data;
     final envelope = data is Map<String, dynamic> ? data['error'] : null;
     final error = envelope is Map<String, dynamic>
@@ -30,8 +33,9 @@ abstract final class ErrorMapper {
     final retryAfter = int.tryParse(
       response.headers.value('Retry-After') ?? '',
     );
-    if (retryAfter != null)
+    if (retryAfter != null) {
       details.putIfAbsent('retry_after_seconds', () => retryAfter);
+    }
     return ApiException(
       statusCode: response.statusCode ?? 0,
       code: ApiErrorCode.fromValue(error['code']),

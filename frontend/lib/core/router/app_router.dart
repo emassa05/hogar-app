@@ -68,10 +68,11 @@ GoRouter appRouter(AppRouterRef ref) {
       if (!session.isAuthenticated && protected) return '/';
       if (session.isAuthenticated &&
           !protected &&
-          state.uri.path != '/account-created')
+          state.uri.path != '/account-created') {
         return session.user?.activeHouseholdId == null
             ? '/households/start'
             : '/home';
+      }
       return null;
     },
     routes: routes.entries
