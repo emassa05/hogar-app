@@ -1,0 +1,4 @@
+tags:
+  e2e:
+    skip: true
+    timeout: 3m
