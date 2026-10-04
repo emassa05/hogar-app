@@ -1,6 +1,6 @@
 part of 'auth_controller.dart';
 
-String _$authControllerHash() => r'bdc8879cba16e964b0619a6ddf0ddb060c756efb';
+String _$authControllerHash() => r'd508378b225047d74711e35598e386359f7ad842';
 
 @ProviderFor(AuthController)
 final authControllerProvider =

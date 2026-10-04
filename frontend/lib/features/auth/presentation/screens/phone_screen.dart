@@ -4,17 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/api_error_code.dart';
+import '../../../../core/errors/app_exception.dart';
+import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/router/route_names.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/app_halo.dart';
+import '../../../../core/widgets/app_icon.dart';
 import '../../../../core/widgets/deadline_builder.dart';
+import '../../../../core/widgets/field_message.dart';
 import '../../../../core/widgets/phone_field.dart';
 import '../../domain/auth_entities.dart';
 import '../auth_controller.dart';
 import '../auth_strings.dart';
-import '../widgets/auth_illustration.dart';
+import '../widgets/access_illustration.dart';
 import '../widgets/auth_layout.dart';
 
 class PhoneScreen extends ConsumerStatefulWidget {
@@ -27,18 +31,23 @@ class PhoneScreen extends ConsumerStatefulWidget {
 class _PhoneScreenState extends ConsumerState<PhoneScreen> {
   final _form = GlobalKey<FormState>();
   final _phone = TextEditingController();
+
+  VerificationPurpose get _purpose => widget.recovery
+      ? VerificationPurpose.passwordReset
+      : VerificationPurpose.registration;
+
   @override
   void initState() {
     super.initState();
     final draft = ref.read(authControllerProvider);
-    _phone.text = draft.verification?.phone.replaceFirst('+56', '') ?? '';
+    final saved = draft.purpose == _purpose ? draft.verification?.phone : null;
+    if (saved != null) {
+      _phone.text = ChileanPhoneFormatter.format(saved.replaceFirst('+56', ''));
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final purpose = widget.recovery
-          ? VerificationPurpose.passwordReset
-          : VerificationPurpose.registration;
-      if (ref.read(authControllerProvider).purpose != purpose) {
-        ref.read(authControllerProvider.notifier).reset(purpose: purpose);
+      if (ref.read(authControllerProvider).purpose != _purpose) {
+        ref.read(authControllerProvider.notifier).reset(purpose: _purpose);
       }
     });
   }
@@ -50,6 +59,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
   }
 
   Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
     if (!_form.currentState!.validate()) return;
     if (await ref
             .read(authControllerProvider.notifier)
@@ -63,53 +73,63 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
     }
   }
 
+  String? _phoneError(AppException? error) {
+    final field = ErrorMessages.field(error, 'phone');
+    if (field != null) return field;
+    if (error is ApiException &&
+        error.code == ApiErrorCode.phoneAlreadyRegistered) {
+      return ErrorMessages.forException(error);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
+    final error = state.error;
+    final fieldError = _phoneError(error);
+    final blocked = error is ApiException && error.retryAfterSeconds != null;
     return AuthLayout(
       recovery: widget.recovery,
       step: 1,
+      scene: widget.recovery ? AccessScene.recover : AccessScene.phone,
+      haloAccent: widget.recovery ? const Color(0xFFC9C3FA) : AppHalos.mint,
       title: widget.recovery
           ? AuthStrings.recoverTitle
           : AuthStrings.phoneTitle,
       accent: widget.recovery
           ? AuthStrings.recoverAccent
           : AuthStrings.phoneAccent,
-      description: widget.recovery
-          ? AuthStrings.recoverBody
-          : AuthStrings.phoneBody,
-      illustration: AuthIllustration(
-        asset: widget.recovery ? 'recover-magnifier.png' : 'phone-number.png',
-        color: widget.recovery ? AppColors.brand : AppColors.successSurface,
+      description: TextSpan(
+        text: widget.recovery ? AuthStrings.recoverBody : AuthStrings.phoneBody,
       ),
+      bannerError: fieldError == null && !blocked ? error : null,
       onRetry: () => unawaited(_submit()),
-      footer: Column(
-        children: [
-          DeadlineBuilder(
-            deadline: state.blockedUntil,
-            builder: (context, seconds) => PrimaryButton(
-              label: seconds > 0
-                  ? AuthStrings.lockedFor(
-                      '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
-                    )
-                  : AuthStrings.sendCode,
+      footer: DeadlineBuilder(
+        deadline: state.blockedUntil,
+        builder: (context, seconds) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PrimaryButton(
+              label: AuthStrings.sendCode,
               loading: state.busy,
+              trailingIcon: AppIcons.arrowRight,
               onPressed: seconds == 0 ? () => unawaited(_submit()) : null,
-              icon: Icons.arrow_forward,
             ),
-          ),
-          TextLinkButton(
-            label: widget.recovery
-                ? AuthStrings.rememberedPassword
-                : AuthStrings.loginLink,
-            onPressed: state.busy
-                ? null
-                : () {
-                    ref.read(authControllerProvider.notifier).reset();
-                    context.goNamed(RouteNames.login);
-                  },
-          ),
-        ],
+            InlineLinkText(
+              prefix: widget.recovery
+                  ? AuthStrings.remembered
+                  : AuthStrings.haveAccount,
+              action: AuthStrings.signIn,
+              onPressed: state.busy
+                  ? null
+                  : () {
+                      ref.read(authControllerProvider.notifier).reset();
+                      context.goNamed(RouteNames.login);
+                    },
+            ),
+          ],
+        ),
       ),
       child: Form(
         key: _form,
@@ -119,17 +139,28 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
             PhoneField(
               controller: _phone,
               enabled: !state.busy,
-              errorText: ErrorMessages.field(state.error, 'phone'),
+              errorText: fieldError,
+              helperText: widget.recovery ? null : AuthStrings.phonePrivacy,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => unawaited(_submit()),
               onChanged: (_) =>
                   ref.read(authControllerProvider.notifier).clearError(),
             ),
-            if (!widget.recovery) ...[
-              const SizedBox(height: 8),
-              const Text(
-                AuthStrings.phonePrivacy,
-                style: AppTypography.bodySmall,
-              ),
-            ],
+            DeadlineBuilder(
+              deadline: state.blockedUntil,
+              builder: (context, seconds) => seconds == 0
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: FieldMessage(
+                        text: AuthStrings.tryAgainIn(
+                          AppStrings.timeRemaining(seconds),
+                        ),
+                        tone: FieldMessageTone.error,
+                        icon: AppIcons.clock,
+                      ),
+                    ),
+            ),
           ],
         ),
       ),

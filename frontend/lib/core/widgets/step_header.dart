@@ -38,7 +38,10 @@ class StepHeader extends StatelessWidget {
             children: [
               const ColoredBox(color: AppColors.borderSubtle),
               TweenAnimationBuilder<double>(
-                tween: Tween(end: index < step! ? 1 : 0),
+                tween: Tween(
+                  begin: index == step! - 1 ? 0 : (index < step! ? 1 : 0),
+                  end: index < step! ? 1 : 0,
+                ),
                 duration: MediaQuery.disableAnimationsOf(context)
                     ? Duration.zero
                     : MotionTokens.entrance,
@@ -64,7 +67,12 @@ class StepHeader extends StatelessWidget {
         : Text(AppStrings.step(step!, total!), style: AppTypography.dataSmall);
     final large = MediaQuery.textScalerOf(context).scale(14) > 20;
     return Padding(
-      padding: EdgeInsets.fromLTRB(onBack == null ? 20 : 16, 2, 20, 12),
+      padding: EdgeInsets.fromLTRB(
+        onBack == null ? 20 : 16,
+        2,
+        20,
+        step == null ? 8 : 12,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

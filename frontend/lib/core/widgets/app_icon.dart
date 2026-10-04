@@ -13,6 +13,7 @@ enum AppIcons {
   chevronLeft('chevron-left', 20),
   chevronRight('chevron-right', 20),
   clock('clock', 16),
+  cook('cook', 16, tinted: false),
   eye('eye', 22),
   eyeOff('eye-off', 22),
   flagChile('flag-chile', 24, height: 16, tinted: false),
@@ -22,6 +23,7 @@ enum AppIcons {
   key('key', 24),
   logo('logo', 24, height: 22, tinted: false),
   message('message', 21),
+  paw('paw', 16, tinted: false),
   refresh('refresh', 18),
   shieldCheck('shield-check', 16),
   template('template', 20);

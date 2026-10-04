@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/app_exception.dart';
@@ -8,7 +9,7 @@ import '../data/auth_repository_impl.dart';
 part 'session_bootstrap.g.dart';
 
 @Riverpod(keepAlive: true)
-Future<void> sessionBootstrap(SessionBootstrapRef ref) async {
+Future<void> sessionBootstrap(Ref ref) async {
   final session = ref.read(sessionControllerProvider.notifier);
   await session.restore();
   if (session.tokens == null) return;

@@ -222,7 +222,16 @@ class _AppTextFieldState extends State<AppTextField> {
                     cursorColor: AppColors.brand,
                     cursorWidth: 2,
                     cursorRadius: const Radius.circular(1),
-                    decoration: InputDecoration.collapsed(
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
                       hintText: widget.hintText,
                       hintStyle: _textStyle(
                         null,

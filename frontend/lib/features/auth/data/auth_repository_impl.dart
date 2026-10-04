@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/dio_client.dart';
@@ -65,5 +66,5 @@ class AuthRepositoryImpl implements AuthRepository {
 }
 
 @Riverpod(keepAlive: true)
-AuthRepository authRepository(AuthRepositoryRef ref) =>
+AuthRepository authRepository(Ref ref) =>
     AuthRepositoryImpl(AuthRemoteDataSource(ref.watch(dioClientProvider)));

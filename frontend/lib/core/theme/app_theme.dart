@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
-import 'app_radius.dart';
 import 'app_typography.dart';
 
 abstract final class AppTheme {
@@ -32,35 +31,15 @@ abstract final class AppTheme {
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 18,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.large),
-          borderSide: const BorderSide(color: AppColors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.large),
-          borderSide: const BorderSide(color: AppColors.borderStrong),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.large),
-          borderSide: const BorderSide(color: AppColors.focus, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.large),
-          borderSide: const BorderSide(color: AppColors.danger),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.large),
-          borderSide: const BorderSide(color: AppColors.danger, width: 1.5),
-        ),
-        errorMaxLines: 4,
-        errorStyle: AppTypography.bodySmall.copyWith(color: AppColors.danger),
+      inputDecorationTheme: const InputDecorationTheme(
+        filled: false,
+        border: InputBorder.none,
+        isDense: true,
+      ),
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: AppColors.brand,
+        selectionColor: AppColors.focusRing,
+        selectionHandleColor: AppColors.brand,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(

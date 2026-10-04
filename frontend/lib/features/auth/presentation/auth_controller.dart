@@ -74,14 +74,16 @@ class AuthController extends _$AuthController {
         var verification = state.verification;
         var proof = state.proof;
         if (error is ApiException) {
-          if (error.retryAfterSeconds != null) {
-            blockedUntil = DateTime.now().toUtc().add(
-              Duration(seconds: error.retryAfterSeconds!),
+          final retryAfter = error.retryAfterSeconds;
+          if (retryAfter != null) {
+            final until = DateTime.now().toUtc().add(
+              Duration(seconds: retryAfter),
             );
-          }
-          if (error.code == ApiErrorCode.verificationResendTooSoon &&
-              blockedUntil != null) {
-            verification = verification?.withResendAt(blockedUntil);
+            if (error.code == ApiErrorCode.verificationResendTooSoon) {
+              verification = verification?.withResendAt(until);
+            } else {
+              blockedUntil = until;
+            }
           }
           if (error.code == ApiErrorCode.invalidVerificationToken) proof = null;
         }

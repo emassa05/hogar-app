@@ -8,14 +8,15 @@ import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/l10n/error_messages.dart';
 import '../../../../core/motion/app_haptics.dart';
 import '../../../../core/router/route_names.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/validation/validators.dart';
 import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/app_halo.dart';
+import '../../../../core/widgets/app_icon.dart';
 import '../../../../core/widgets/password_field.dart';
 import '../../../../core/widgets/password_rules_checklist.dart';
 import '../auth_controller.dart';
 import '../auth_strings.dart';
-import '../widgets/auth_illustration.dart';
+import '../widgets/access_illustration.dart';
 import '../widgets/auth_layout.dart';
 
 class PasswordScreen extends ConsumerStatefulWidget {
@@ -29,6 +30,8 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
   final _form = GlobalKey<FormState>();
   final _password = TextEditingController();
   final _confirmation = TextEditingController();
+  final _confirmationFocus = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -41,14 +44,18 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
   void dispose() {
     _password.dispose();
     _confirmation.dispose();
+    _confirmationFocus.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
     if (!_form.currentState!.validate()) return;
     final controller = ref.read(authControllerProvider.notifier);
     if (widget.recovery) {
-      await controller.resetPassword(_password.text);
+      if (await controller.resetPassword(_password.text)) {
+        unawaited(AppHaptics.success());
+      }
     } else if (controller.savePassword(_password.text)) {
       unawaited(AppHaptics.commit());
       if (mounted) unawaited(context.pushNamed(RouteNames.registerName));
@@ -58,31 +65,37 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
+    final rules = PasswordRules(_password.text);
     final matches =
         _confirmation.text.isNotEmpty &&
         _password.text.trim() == _confirmation.text.trim();
+    final fieldError = ErrorMessages.field(
+      state.error,
+      widget.recovery ? 'new_password' : 'password',
+    );
     return AuthLayout(
       recovery: widget.recovery,
       step: widget.recovery ? 3 : 2,
+      scene: AccessScene.password,
+      haloAccent: AppHalos.butter,
+      contentGap: 20,
       title: widget.recovery
           ? AuthStrings.newPasswordTitle
           : AuthStrings.passwordTitle,
       accent: AuthStrings.passwordAccent,
-      description: widget.recovery
-          ? AuthStrings.newPasswordBody
-          : AuthStrings.passwordBody,
-      illustration: AuthIllustration(
-        asset: 'password-lock.png',
-        height: widget.recovery ? 176 : 220,
-        color: AppColors.warning,
+      description: TextSpan(
+        text: widget.recovery
+            ? AuthStrings.newPasswordBody
+            : AuthStrings.passwordBody,
       ),
+      bannerError: fieldError == null ? state.error : null,
       onRetry: () => unawaited(_submit()),
       footer: PrimaryButton(
         label: widget.recovery
             ? AuthStrings.saveAndEnter
             : AppStrings.continueAction,
         loading: state.busy,
-        icon: Icons.arrow_forward,
+        trailingIcon: AppIcons.arrowRight,
         onPressed: () => unawaited(_submit()),
       ),
       child: Form(
@@ -96,39 +109,39 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
                   : AppStrings.password,
               controller: _password,
               enabled: !state.busy,
-              errorText: ErrorMessages.field(
-                state.error,
-                widget.recovery ? 'new_password' : 'password',
-              ),
+              errorText: fieldError,
+              textInputAction: widget.recovery
+                  ? TextInputAction.next
+                  : TextInputAction.done,
+              onSubmitted: (_) => widget.recovery
+                  ? _confirmationFocus.requestFocus()
+                  : unawaited(_submit()),
               onChanged: (_) {
                 ref.read(authControllerProvider.notifier).clearError();
                 setState(() {});
               },
             ),
-            const SizedBox(height: 20),
-            PasswordRulesChecklist(password: _password.text),
+            SizedBox(height: widget.recovery ? 16 : 20),
+            PasswordRulesChecklist(
+              password: _password.text,
+              showRules: !widget.recovery || !rules.isValid,
+            ),
             if (widget.recovery) ...[
               const SizedBox(height: 16),
               PasswordField(
                 label: AuthStrings.repeatPassword,
                 controller: _confirmation,
+                focusNode: _confirmationFocus,
                 enabled: !state.busy,
+                successText: matches ? AuthStrings.passwordsMatch : null,
                 validator: (value) =>
                     value?.trim() == _password.text.trim() &&
                         (value?.isNotEmpty ?? false)
                     ? null
                     : AuthStrings.passwordsMismatch,
+                onSubmitted: (_) => unawaited(_submit()),
                 onChanged: (_) => setState(() {}),
               ),
-              if (matches) ...[
-                const SizedBox(height: 8),
-                Text(
-                  AuthStrings.passwordsMatch,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.success,
-                  ),
-                ),
-              ],
             ],
           ],
         ),

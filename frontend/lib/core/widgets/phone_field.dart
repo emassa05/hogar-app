@@ -8,6 +8,11 @@ import '../validation/validators.dart';
 import 'app_icon.dart';
 import 'app_text_field.dart';
 
+String displayPhone(String phone) =>
+    phone.startsWith(PhoneValidator.defaultCountryCode)
+    ? '${PhoneValidator.defaultCountryCode} ${ChileanPhoneFormatter.format(phone.substring(PhoneValidator.defaultCountryCode.length))}'
+    : phone;
+
 class PhoneField extends StatelessWidget {
   const PhoneField({
     this.controller,

@@ -1,6 +1,6 @@
 part of 'session_bootstrap.dart';
 
-String _$sessionBootstrapHash() => r'250c2350bd447148a1b1b82b5f7abb65eeea1e22';
+String _$sessionBootstrapHash() => r'7c075c3e808a20dbb51f8771857d6c4966a7a178';
 
 @ProviderFor(sessionBootstrap)
 final sessionBootstrapProvider = FutureProvider<void>.internal(
