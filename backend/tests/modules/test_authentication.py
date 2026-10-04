@@ -1,5 +1,20 @@
-from httpx import AsyncClient
+import uuid
+from datetime import timedelta
 
+import pytest
+from httpx import AsyncClient
+from sqlalchemy import update
+
+from app.common.clock import utc_now
+from app.common.config import Settings
+from app.common.database import get_database
+from app.common.security.tokens import (
+    TokenType,
+    decode_token,
+    hash_opaque_token,
+    issue_access_token,
+)
+from app.modules.auth.models import AuthSession, RefreshToken
 from tests.factories import DEFAULT_PASSWORD, FakeSmsSender, RegisteredUser, verify_phone
 
 
@@ -165,16 +180,168 @@ async def test_logout_revokes_session(client: AsyncClient, marta: RegisteredUser
     )
 
     assert response.status_code == 204
+    assert response.content == b""
     assert (await client.get("/users/me", headers=marta.headers)).status_code == 401
     refreshed = await client.post("/auth/refresh", json={"refresh_token": marta.refresh_token})
     assert refreshed.status_code == 401
+    assert refreshed.json()["error"]["code"] == "INVALID_REFRESH_TOKEN"
 
 
-async def test_logout_requires_authentication(client: AsyncClient, marta: RegisteredUser) -> None:
+async def test_logout_does_not_require_access_token(
+    client: AsyncClient, marta: RegisteredUser
+) -> None:
     response = await client.post("/auth/logout", json={"refresh_token": marta.refresh_token})
 
-    assert response.status_code == 401
-    assert response.json()["error"]["code"] == "UNAUTHENTICATED"
+    assert response.status_code == 204
+    assert response.content == b""
+
+
+@pytest.mark.parametrize("with_authorization", [False, True])
+async def test_logout_is_idempotent(
+    client: AsyncClient, marta: RegisteredUser, with_authorization: bool
+) -> None:
+    headers = marta.headers if with_authorization else {}
+    first = await client.post(
+        "/auth/logout", json={"refresh_token": marta.refresh_token}, headers=headers
+    )
+
+    repeated = await client.post(
+        "/auth/logout", json={"refresh_token": marta.refresh_token}, headers=headers
+    )
+
+    assert first.status_code == repeated.status_code == 204
+    assert first.content == repeated.content == b""
+
+
+async def test_logout_with_unknown_token_returns_no_content(
+    client: AsyncClient, marta: RegisteredUser
+) -> None:
+    response = await client.post("/auth/logout", json={"refresh_token": "unknown-refresh-token"})
+
+    assert response.status_code == 204
+    assert response.content == b""
+    assert (await client.get("/users/me", headers=marta.headers)).status_code == 200
+
+
+async def test_logout_with_rotated_token_revokes_session(
+    client: AsyncClient, marta: RegisteredUser
+) -> None:
+    rotated = await client.post("/auth/refresh", json={"refresh_token": marta.refresh_token})
+    assert rotated.status_code == 200
+    tokens = rotated.json()
+
+    response = await client.post("/auth/logout", json={"refresh_token": marta.refresh_token})
+
+    assert response.status_code == 204
+    assert (
+        await client.get("/users/me", headers={"Authorization": f"Bearer {tokens['access_token']}"})
+    ).status_code == 401
+    refreshed = await client.post("/auth/refresh", json={"refresh_token": tokens["refresh_token"]})
+    assert refreshed.status_code == 401
+    assert refreshed.json()["error"]["code"] == "INVALID_REFRESH_TOKEN"
+
+
+async def test_logout_ignores_invalid_access_token(
+    client: AsyncClient, marta: RegisteredUser
+) -> None:
+    response = await client.post(
+        "/auth/logout",
+        json={"refresh_token": marta.refresh_token},
+        headers={"Authorization": "Bearer invalid-access-token"},
+    )
+
+    assert response.status_code == 204
+    assert (await client.get("/users/me", headers=marta.headers)).status_code == 401
+
+
+async def test_logout_ignores_expired_access_token(
+    client: AsyncClient, marta: RegisteredUser, settings: Settings
+) -> None:
+    claims = decode_token(marta.access_token, TokenType.ACCESS, settings)
+    expired_settings = settings.model_copy(update={"access_token_ttl_minutes": -1})
+    expired = issue_access_token(
+        uuid.UUID(marta.user_id), uuid.UUID(claims["sid"]), expired_settings
+    )
+    headers = {"Authorization": f"Bearer {expired.value}"}
+    assert (await client.get("/users/me", headers=headers)).status_code == 401
+
+    response = await client.post(
+        "/auth/logout", json={"refresh_token": marta.refresh_token}, headers=headers
+    )
+
+    assert response.status_code == 204
+    assert (await client.get("/users/me", headers=marta.headers)).status_code == 401
+
+
+@pytest.mark.parametrize("expired", ["refresh_token", "session"])
+async def test_logout_with_expired_token_or_session_returns_no_content(
+    client: AsyncClient, marta: RegisteredUser, expired: str
+) -> None:
+    async with get_database().session_factory() as session:
+        if expired == "refresh_token":
+            statement = update(RefreshToken).where(
+                RefreshToken.token_hash == hash_opaque_token(marta.refresh_token)
+            )
+        else:
+            statement = update(AuthSession).where(AuthSession.user_id == marta.user_id)
+        await session.execute(statement.values(expires_at=utc_now() - timedelta(seconds=1)))
+        await session.commit()
+
+    response = await client.post("/auth/logout", json={"refresh_token": marta.refresh_token})
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+
+async def test_logout_revokes_refresh_token_owner_regardless_of_authorization_header(
+    client: AsyncClient, marta: RegisteredUser, pablo: RegisteredUser
+) -> None:
+    response = await client.post(
+        "/auth/logout", json={"refresh_token": marta.refresh_token}, headers=pablo.headers
+    )
+
+    assert response.status_code == 204
+    assert (await client.get("/users/me", headers=marta.headers)).status_code == 401
+    assert (await client.get("/users/me", headers=pablo.headers)).status_code == 200
+
+
+async def test_logout_preserves_other_sessions_of_same_user(
+    client: AsyncClient, marta: RegisteredUser
+) -> None:
+    login = await client.post(
+        "/auth/login", json={"phone": marta.phone, "password": marta.password}
+    )
+    assert login.status_code == 200
+    other_tokens = login.json()["tokens"]
+
+    response = await client.post("/auth/logout", json={"refresh_token": marta.refresh_token})
+
+    assert response.status_code == 204
+    assert (await client.get("/users/me", headers=marta.headers)).status_code == 401
+    assert (
+        await client.get(
+            "/users/me", headers={"Authorization": f"Bearer {other_tokens['access_token']}"}
+        )
+    ).status_code == 200
+    assert (
+        await client.post("/auth/refresh", json={"refresh_token": other_tokens["refresh_token"]})
+    ).status_code == 200
+
+
+async def test_logout_rate_limit_by_ip(client: AsyncClient) -> None:
+    responses = [
+        await client.post("/auth/logout", json={"refresh_token": f"unknown-token-{index}"})
+        for index in range(30)
+    ]
+
+    limited = await client.post("/auth/logout", json={"refresh_token": "another-unknown-token"})
+
+    assert [response.status_code for response in responses] == [204] * 30
+    assert responses[-1].headers["X-RateLimit-Limit"] == "30"
+    assert responses[-1].headers["X-RateLimit-Remaining"] == "0"
+    assert limited.status_code == 429
+    assert limited.json()["error"]["code"] == "RATE_LIMITED"
+    assert int(limited.headers["Retry-After"]) >= 1
 
 
 async def test_password_reset_revokes_sessions_and_unlocks(

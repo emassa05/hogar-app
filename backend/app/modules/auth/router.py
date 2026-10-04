@@ -7,7 +7,6 @@ from app.common.database import SessionDependency
 from app.common.dependencies import SettingsDependency, SmsSenderDependency
 from app.common.rate_limit import rate_limit
 from app.modules.auth.auth_service import AuthenticatedUser, AuthService
-from app.modules.auth.dependencies import CurrentUser
 from app.modules.auth.models import PhoneVerification
 from app.modules.auth.schemas import (
     AuthSessionResponse,
@@ -132,14 +131,17 @@ async def refresh_tokens(
     return _token_response(await SessionService(session, settings).refresh(payload.refresh_token))
 
 
-@router.post("/logout", status_code=HTTPStatus.NO_CONTENT)
+@router.post(
+    "/logout",
+    status_code=HTTPStatus.NO_CONTENT,
+    dependencies=[Depends(rate_limit("30/minute", "logout"))],
+)
 async def logout(
     payload: RefreshRequest,
-    current_user: CurrentUser,
     session: SessionDependency,
     settings: SettingsDependency,
 ) -> None:
-    await SessionService(session, settings).logout(payload.refresh_token, current_user.id)
+    await SessionService(session, settings).logout(payload.refresh_token)
 
 
 @router.post("/password-reset", dependencies=[Depends(rate_limit("10/hour", "password-reset"))])
