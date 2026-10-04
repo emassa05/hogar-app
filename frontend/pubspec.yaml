@@ -54,3 +54,6 @@ flutter:
       fonts:
         - asset: assets/fonts/instrument-serif-italic.ttf
           style: italic
+
+  assets:
+    - assets/images/avatars/

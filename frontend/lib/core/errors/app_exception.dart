@@ -15,16 +15,26 @@ final class NetworkException extends AppException {
 }
 
 final class ApiException extends AppException {
-  ApiException({required this.statusCode, required this.code, Map<String, dynamic> details = const {}, this.requestId}) : details = UnmodifiableMapView(details);
+  ApiException({
+    required this.statusCode,
+    required this.code,
+    Map<String, dynamic> details = const {},
+    this.requestId,
+  }) : details = UnmodifiableMapView(details);
 
   final int statusCode;
   final ApiErrorCode code;
   final Map<String, dynamic> details;
   final String? requestId;
 
-  List<FieldValidationError> get fields => FieldValidationError.parse(details['fields']);
-  int? get remainingAttempts => details['remaining_attempts'] is num ? (details['remaining_attempts'] as num).toInt() : null;
-  int? get retryAfterSeconds => details['retry_after_seconds'] is num ? (details['retry_after_seconds'] as num).toInt() : null;
+  List<FieldValidationError> get fields =>
+      FieldValidationError.parse(details['fields']);
+  int? get remainingAttempts => details['remaining_attempts'] is num
+      ? (details['remaining_attempts'] as num).toInt()
+      : null;
+  int? get retryAfterSeconds => details['retry_after_seconds'] is num
+      ? (details['retry_after_seconds'] as num).toInt()
+      : null;
 }
 
 final class UnauthenticatedException extends AppException {

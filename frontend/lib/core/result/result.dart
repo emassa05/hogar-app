@@ -6,7 +6,10 @@ import '../network/error_mapper.dart';
 sealed class Result<T> {
   const Result();
 
-  R fold<R>(R Function(T value) success, R Function(AppException error) failure) => switch (this) {
+  R fold<R>(
+    R Function(T value) success,
+    R Function(AppException error) failure,
+  ) => switch (this) {
     Success<T>(:final value) => success(value),
     Failure<T>(:final error) => failure(error),
   };

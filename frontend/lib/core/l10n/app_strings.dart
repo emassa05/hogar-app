@@ -26,7 +26,8 @@ abstract final class AppStrings {
   static const characterPicker = 'ELIGE UN PERSONAJE';
   static const noCharacter = 'Sin elegir';
   static const home = 'Inicio';
-  static const comingSoon = 'Próximamente podrás organizar las tareas de tu hogar.';
+  static const comingSoon =
+      'Próximamente podrás organizar las tareas de tu hogar.';
   static const foundation = 'Estamos preparando tu hogar.';
   static const chooseHousehold = 'Empezar';
   static const register = 'Crear cuenta';
@@ -41,5 +42,6 @@ abstract final class AppStrings {
   static String passwordScore(int score) => '$score de 4';
   static String character(String name) => 'Personaje $name';
   static String initials(String name) => 'Avatar de $name';
-  static String timeRemaining(int seconds) => '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
+  static String timeRemaining(int seconds) =>
+      '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
 }
