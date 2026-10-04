@@ -16,6 +16,7 @@ dependencies:
   flutter_riverpod: 2.6.1
   flutter_secure_storage: 9.2.4
   flutter_svg: 2.0.17
+  share_plus: 10.1.4
   freezed_annotation: 2.4.4
   go_router: 15.1.3
   intl: 0.20.2
