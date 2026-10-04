@@ -57,6 +57,19 @@ abstract final class HouseholdStrings {
   static const profile = 'Mi perfil doméstico';
   static const accountAvatar = 'Tu personaje te identifica en toda la app.';
   static const nickname = 'Cómo te llamamos';
+  static const nicknameShort = 'Se muestra a los demás integrantes.';
+  static const nicknameLength = 'Usa un máximo de 40 caracteres.';
+  static const capacityUnset = 'Sin definir';
+  static const saveAndContinue = 'Guardar y continuar';
+  static const roleAdmin = 'Administra el hogar';
+  static const chooseTarget = 'Elige una categoría o actividad del catálogo.';
+  static const chooseEndDate = 'Elegir fecha de término';
+  static const endDateNeeded = 'Elige hasta cuándo dura la restricción.';
+  static const appliedEmpty =
+      'Empezaste con un hogar vacío. Podrás crear tareas cuando quieras.';
+  static const codeHint = 'XXXX-XXXX';
+  static const joinNote =
+      'Tu perfil doméstico es propio de cada hogar: podrás completarlo después de unirte.';
   static const nicknameHelp =
       'Se muestra a los demás integrantes. Si lo dejas vacío, usamos el nombre de tu cuenta.';
   static const capacity = 'Capacidad que puedo asumir';
@@ -139,9 +152,21 @@ abstract final class HouseholdStrings {
       '$count ${count == 1 ? 'integrante' : 'integrantes'}';
   static String taskCount(int count) =>
       '$count ${count == 1 ? 'tarea' : 'tareas'}';
-  static String addTasks(int count) => 'Añadir $count tareas';
-  static String willAdd(int count) => 'Se añadirán $count tareas';
+  static String addTasks(int count) => 'Añadir ${taskCount(count)}';
+  static String willAdd(int count) =>
+      count == 1 ? 'Se añadirá 1 tarea' : 'Se añadirán $count tareas';
   static String templateCount(int count) =>
       '$count ${count == 1 ? 'plantilla' : 'plantillas'}';
   static String temporaryUntil(String date) => 'Temporal · hasta $date';
+  static String endsOn(String date) => 'Hasta el $date';
+  static String percent(int value) => '$value %';
+  static String avatarOption(String name) => 'Personaje $name';
+  static String memberOptions(String name) => 'Opciones para $name';
+  static String restrictionOptions(String name) =>
+      'Opciones de la restricción $name';
+  static String codeLabel(String spelled) => 'Código del hogar: $spelled';
+  static String appliedTasks(int count) =>
+      'Se ${count == 1 ? 'añadió 1 tarea' : 'añadieron $count tareas'} a tu hogar.';
+  static String shareMessage(String household, String code, String url) =>
+      'Únete a «$household» en HogarApp con el código $code o desde $url';
 }

@@ -39,7 +39,7 @@ class SectionLabel extends StatelessWidget {
     header: true,
     child: Row(
       children: [
-        Text(label, style: AppTypography.labelSmall),
+        Flexible(flex: 3, child: Text(label, style: AppTypography.labelSmall)),
         if (count != null) ...[
           const SizedBox(width: 8),
           Container(
@@ -60,7 +60,10 @@ class SectionLabel extends StatelessWidget {
         const Expanded(child: Divider(color: AppColors.borderSubtle)),
         if (trailing != null) ...[
           const SizedBox(width: 10),
-          Text(trailing!, style: AppTypography.dataSmall),
+          Flexible(
+            flex: 2,
+            child: Text(trailing!, style: AppTypography.dataSmall),
+          ),
         ],
       ],
     ),
