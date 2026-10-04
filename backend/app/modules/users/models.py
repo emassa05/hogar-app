@@ -1,7 +1,7 @@
 import uuid
 from enum import StrEnum
 
-from sqlalchemy import Enum, String
+from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.common.database import Base, TimestampMixin, UuidPrimaryKeyMixin
@@ -25,4 +25,6 @@ class User(UuidPrimaryKeyMixin, TimestampMixin, Base):
         Enum(Avatar, name="avatar", values_callable=lambda members: [m.value for m in members])
     )
     password_hash: Mapped[str] = mapped_column(String(255))
-    active_household_id: Mapped[uuid.UUID | None]
+    active_household_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("households.id", ondelete="SET NULL")
+    )
