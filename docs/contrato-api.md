@@ -830,7 +830,7 @@ A6, «Añadir restricción», y A7, «Tareas que no puedo hacer». Una restricci
 
 ```json
 {
-  "target": { "type": "category", "key": "cooking" },
+  "target": { "type": "category", "key": "food" },
   "kind": "temporary",
   "starts_on": "2026-10-04",
   "ends_on": "2027-03-30"
@@ -866,7 +866,7 @@ Mismo cuerpo que al crear. `200` → `Restriction`
 A7, «Tareas que prefiero». Una preferencia no es una obligación.
 
 ```json
-{ "preferred_activity_keys": ["cook", "weekly_shopping", "plants"] }
+{ "preferred_activity_keys": ["cook", "weekly_shopping", "water_plants"] }
 ```
 
 | Regla | Detalle |
