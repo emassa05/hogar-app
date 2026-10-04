@@ -121,7 +121,9 @@ abstract final class ErrorMessages {
   static String? field(AppException? error, String field) {
     if (error is! ApiException) return null;
     for (final issue in error.fields) {
-      if (issue.fieldName == field) return forField(issue);
+      if (issue.fieldName == field || issue.fieldName.startsWith('$field.')) {
+        return forField(issue);
+      }
     }
     return null;
   }
