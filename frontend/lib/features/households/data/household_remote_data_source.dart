@@ -82,4 +82,8 @@ class HouseholdRemoteDataSource {
   Future<void> removeMember(String id, String userId) async {
     await dio.delete<Object?>('/households/$id/members/$userId');
   }
+
+  Future<void> leave(String id) async {
+    await dio.post<Object?>('/households/$id/leave');
+  }
 }

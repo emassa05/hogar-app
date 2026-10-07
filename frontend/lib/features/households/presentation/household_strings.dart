@@ -1,4 +1,16 @@
 abstract final class HouseholdStrings {
+  static const sensitiveArea = 'Zona sensible';
+  static const leaveQuestion = '¿Abandonar este hogar?';
+  static const leaveHelp =
+      'Dejarás de pertenecer a este hogar. Tu historial se conserva. Para volver necesitarás una invitación.';
+  static const leaveConfirmed =
+      'Ya no perteneces a este hogar. Elige otro hogar o crea uno nuevo.';
+  static const leaveUncertain =
+      'No pudimos confirmar la salida. Reintenta para comprobar si todavía perteneces al hogar.';
+  static const transferBeforeLeaving =
+      'Antes de salir, da administración a otra persona desde Integrantes. Si eres el único integrante, no puedes abandonar el hogar.';
+  static const manageMembers = 'Ir a Integrantes';
+  static String leaveHousehold(String name) => 'Abandonar $name';
   static const avatarSaved =
       'El personaje ya está guardado. Falta guardar el perfil doméstico.';
   static const preferencesPartSaved =

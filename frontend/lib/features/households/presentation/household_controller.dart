@@ -8,6 +8,8 @@ import '../../../core/result/result_value.dart';
 import '../../../core/session/session_controller.dart';
 import '../../../core/session/session_operation.dart';
 import '../../../core/validation/validators.dart';
+import '../../profile/presentation/member_profile_provider.dart';
+import '../../profile/presentation/profile_controller.dart';
 import '../data/household_repository_impl.dart';
 import '../domain/household_entities.dart';
 import 'household_flow_state.dart';
@@ -21,6 +23,7 @@ class HouseholdController extends _$HouseholdController {
   IdempotentAction? _creation;
   String? _creationName;
   String? _pendingPreviewCode;
+  String? _uncertainLeave;
   @override
   HouseholdFlowState build() {
     ref.onDispose(() => _alive = false);
@@ -43,6 +46,7 @@ class HouseholdController extends _$HouseholdController {
     _creation = null;
     _creationName = null;
     _pendingPreviewCode = null;
+    _uncertainLeave = null;
     state = const HouseholdFlowState();
   }
 
@@ -223,6 +227,80 @@ class HouseholdController extends _$HouseholdController {
     ref.invalidate(householdListProvider);
     ref.invalidate(activeHouseholdProvider);
   });
+  Future<bool> leave(String id) async {
+    if (!_canStart) return false;
+    final session = ref.read(sessionControllerProvider.notifier);
+    final user = ref.read(sessionControllerProvider).user;
+    if (user?.activeHouseholdId != id) return false;
+    final revision = ++_revision;
+    var identityChanged = false;
+    final identitySubscription = ref.listen(sessionControllerProvider, (
+      previous,
+      next,
+    ) {
+      if (next.user?.id != user!.id || next.user?.activeHouseholdId != id) {
+        identityChanged = true;
+      }
+    });
+    final operation = SessionOperation(
+      session,
+      isAlive: () =>
+          _alive &&
+          !identityChanged &&
+          revision == _revision &&
+          ref.read(sessionControllerProvider).user?.id == user!.id &&
+          ref.read(sessionControllerProvider).user?.activeHouseholdId == id,
+    );
+    state = state.copyWith(busy: true, error: null, savedPart: '');
+    final repository = ref.read(householdRepositoryProvider);
+    final result = await capture(() async {
+      var stillMember = true;
+      if (_uncertainLeave == id) {
+        final households = (await repository.list()).valueOrThrow;
+        operation.checkCurrent();
+        stillMember = households.any((household) => household.id == id);
+      }
+      if (stillMember) (await repository.leave(id)).valueOrThrow;
+    });
+    identitySubscription.close();
+    if (!operation.isCurrent) {
+      if (_alive && revision == _revision) reset();
+      return false;
+    }
+    if (result case Failure<void>(:final error)) {
+      if (error is NetworkException ||
+          error is ApiException && error.statusCode >= 500) {
+        _uncertainLeave = id;
+      }
+      state = state.copyWith(
+        busy: false,
+        error: error,
+        savedPart: _uncertainLeave == id ? HouseholdStrings.leaveUncertain : '',
+        blockedUntil: error is ApiException && error.retryAfterSeconds != null
+            ? DateTime.now().toUtc().add(
+                Duration(seconds: error.retryAfterSeconds!),
+              )
+            : state.blockedUntil,
+      );
+      return false;
+    }
+    _uncertainLeave = null;
+    session.confirmUser(
+      ref
+          .read(sessionControllerProvider)
+          .user!
+          .copyWith(activeHouseholdId: null),
+    );
+    state = const HouseholdFlowState(
+      savedPart: HouseholdStrings.leaveConfirmed,
+    );
+    ref.invalidate(householdListProvider);
+    ref.invalidate(activeHouseholdProvider);
+    ref.invalidate(memberProfileProvider);
+    ref.invalidate(profileControllerProvider(id));
+    return true;
+  }
+
   Future<bool> changeRole(String id, String userId, MemberRole role) => _run((
     operation,
   ) async {

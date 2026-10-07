@@ -14,4 +14,5 @@ abstract interface class HouseholdRepository {
   Future<Result<Member>> changeRole(String id, String userId, MemberRole role);
   Future<Result<SessionUser>> selectActive(String id);
   Future<Result<void>> removeMember(String id, String userId);
+  Future<Result<void>> leave(String id);
 }

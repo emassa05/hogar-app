@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/api_error_code.dart';
+import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/session/session_controller.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -20,6 +22,66 @@ import '../widgets/member_tile.dart';
 
 class HouseholdSettingsScreen extends ConsumerWidget {
   const HouseholdSettingsScreen({super.key});
+
+  Future<void> _leave(
+    BuildContext context,
+    WidgetRef ref,
+    HouseholdDetail household,
+  ) async {
+    final userId = ref.read(sessionControllerProvider).user?.id;
+    final epoch = ref.read(sessionControllerProvider.notifier).epoch;
+    var identityChanged = false;
+    final subscription = ref.listenManual(sessionControllerProvider, (
+      previous,
+      next,
+    ) {
+      if (next.user?.id != userId ||
+          next.user?.activeHouseholdId != household.id) {
+        identityChanged = true;
+      }
+    });
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        scrollable: true,
+        title: const Text(HouseholdStrings.leaveQuestion),
+        content: Text('${household.name}\n${HouseholdStrings.leaveHelp}'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(HouseholdStrings.cancel),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(HouseholdStrings.leaveHousehold(household.name)),
+          ),
+        ],
+      ),
+    );
+    subscription.close();
+    if (confirmed != true ||
+        identityChanged ||
+        !context.mounted ||
+        ref.read(sessionControllerProvider).user?.id != userId ||
+        ref.read(sessionControllerProvider).user?.activeHouseholdId !=
+            household.id ||
+        ref.read(sessionControllerProvider.notifier).epoch != epoch) {
+      return;
+    }
+    final left = await ref
+        .read(householdControllerProvider.notifier)
+        .leave(household.id);
+    if (left &&
+        context.mounted &&
+        ref.read(sessionControllerProvider).user?.id == userId &&
+        ref.read(sessionControllerProvider.notifier).epoch == epoch &&
+        ref.read(sessionControllerProvider).user?.activeHouseholdId == null) {
+      context.goNamed(RouteNames.householdSwitch);
+    }
+  }
 
   Future<void> _act(
     BuildContext context,
@@ -86,6 +148,7 @@ class HouseholdSettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final membersKey = GlobalKey();
     final active = ref.watch(activeHouseholdProvider);
     final flow = ref.watch(householdControllerProvider);
     final activeId = ref.watch(
@@ -155,7 +218,8 @@ class HouseholdSettingsScreen extends ConsumerWidget {
               ),
               if (value != null) ...[
                 const SizedBox(height: 16),
-                const Text(
+                Text(
+                  key: membersKey,
                   HouseholdStrings.members,
                   style: AppTypography.titleMedium,
                 ),
@@ -224,6 +288,35 @@ class HouseholdSettingsScreen extends ConsumerWidget {
                           ),
                   ),
                 ],
+                const SizedBox(height: 24),
+                const Text(
+                  HouseholdStrings.sensitiveArea,
+                  style: AppTypography.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                  onPressed: flow.busy
+                      ? null
+                      : () => _leave(context, ref, value),
+                  child: Text(HouseholdStrings.leaveHousehold(value.name)),
+                ),
+                if (flow.error case ApiException(
+                  code: ApiErrorCode.lastAdminMustTransfer,
+                )) ...[
+                  const Text(HouseholdStrings.transferBeforeLeaving),
+                  TextButton(
+                    onPressed: () {
+                      final target = membersKey.currentContext;
+                      if (target != null) {
+                        unawaited(Scrollable.ensureVisible(target));
+                      }
+                    },
+                    child: const Text(HouseholdStrings.manageMembers),
+                  ),
+                ],
               ],
               if (flow.error != null || flow.savedPart.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -232,6 +325,9 @@ class HouseholdSettingsScreen extends ConsumerWidget {
                   savedPart: flow.savedPart,
                   onRetry: flow.busy || activeId == null
                       ? null
+                      : flow.savedPart == HouseholdStrings.leaveUncertain &&
+                            value != null
+                      ? () => unawaited(_leave(context, ref, value))
                       : () => unawaited(
                           ref
                               .read(householdControllerProvider.notifier)

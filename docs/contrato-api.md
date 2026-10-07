@@ -764,6 +764,8 @@ Retira a un integrante. No se usa sobre uno mismo (para eso está `leave`). Sus 
 
 Abandona el hogar. Sus participaciones no completadas quedan libres y su historial se conserva.
 
+Si era el hogar activo, el backend deja `active_household_id` en `null`. Tras confirmar la salida, la app muestra «Mis hogares» para elegir manualmente otro hogar; no selecciona uno automáticamente. Si la consulta confirma que no quedan hogares, abre el flujo existente para crear uno o unirse con un código. Un error al consultar los hogares no equivale a una lista vacía: la app informa del problema y permite reintentar sin volver a habilitar el hogar abandonado. La confirmación de salida no depende de recargar la cuenta: la app sincroniza el hogar activo a partir del resultado confirmado.
+
 `204`
 
 | Error | Cuándo |

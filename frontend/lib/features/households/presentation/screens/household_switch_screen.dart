@@ -42,6 +42,25 @@ class HouseholdSwitchScreen extends ConsumerWidget {
       ),
     );
     final flow = ref.watch(householdControllerProvider);
+    ref.listen(householdListProvider, (previous, next) {
+      if (next.asData?.value.isEmpty == true &&
+          ref.read(sessionControllerProvider).user?.activeHouseholdId == null &&
+          ref.read(householdControllerProvider).savedPart ==
+              HouseholdStrings.leaveConfirmed) {
+        final userId = ref.read(sessionControllerProvider).user?.id;
+        final epoch = ref.read(sessionControllerProvider.notifier).epoch;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted &&
+              ref.read(sessionControllerProvider).user?.id == userId &&
+              ref.read(sessionControllerProvider.notifier).epoch == epoch &&
+              ref.read(sessionControllerProvider).user?.activeHouseholdId ==
+                  null &&
+              ref.read(householdListProvider).asData?.value.isEmpty == true) {
+            context.goNamed(RouteNames.householdChoice);
+          }
+        });
+      }
+    });
     return HouseholdLayout(
       title: HouseholdStrings.myHouseholds,
       busy: flow.busy,
@@ -51,6 +70,10 @@ class HouseholdSwitchScreen extends ConsumerWidget {
         children: [
           if (flow.error != null) ...[
             ErrorBanner(error: flow.error!),
+            const SizedBox(height: 16),
+          ],
+          if (flow.savedPart == HouseholdStrings.leaveConfirmed) ...[
+            const InfoBanner(message: HouseholdStrings.leaveConfirmed),
             const SizedBox(height: 16),
           ],
           if (flow.busy) ...[

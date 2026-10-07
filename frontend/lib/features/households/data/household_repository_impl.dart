@@ -52,6 +52,8 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
   @override
   Future<Result<void>> removeMember(String id, String userId) =>
       capture(() => remote.removeMember(id, userId));
+  @override
+  Future<Result<void>> leave(String id) => capture(() => remote.leave(id));
 }
 
 @Riverpod(keepAlive: true)
