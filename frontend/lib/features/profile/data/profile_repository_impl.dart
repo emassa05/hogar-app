@@ -11,8 +11,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   const ProfileRepositoryImpl(this.remote);
   final ProfileRemoteDataSource remote;
   @override
-  Future<Result<MemberProfile>> profile(String id) =>
-      capture(() async => (await remote.profile(id)).toDomain());
+  Future<Result<MemberProfile>> profile(String id, {String userId = 'me'}) =>
+      capture(
+        () async => (await remote.profile(id, userId: userId)).toDomain(),
+      );
   @override
   Future<Result<MemberProfile>> update(
     String id,

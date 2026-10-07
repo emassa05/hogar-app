@@ -31,10 +31,19 @@ class HouseholdSettingsScreen extends ConsumerWidget {
       onBack: () => context.goNamed(RouteNames.home),
       trailing: ownMember == null
           ? null
-          : AvatarCircle(
-              avatar: ownMember.avatar,
-              name: ownMember.displayName,
-              size: 40,
+          : InkWell(
+              onTap: () => context.pushNamed(
+                RouteNames.memberProfile,
+                pathParameters: {
+                  'householdId': household.requireValue!.id,
+                  'userId': 'me',
+                },
+              ),
+              child: AvatarCircle(
+                avatar: ownMember.avatar,
+                name: ownMember.displayName,
+                size: 40,
+              ),
             ),
       child: household.when(
         skipLoadingOnRefresh: false,
@@ -72,7 +81,17 @@ class HouseholdSettingsScreen extends ConsumerWidget {
                   const AppCard(child: Text(HouseholdStrings.noMembers)),
                 for (final (index, member) in value.members.indexed) ...[
                   if (index > 0) const SizedBox(height: 16),
-                  MemberTile(member: member, index: index),
+                  MemberTile(
+                    member: member,
+                    index: index,
+                    onPressed: () => context.pushNamed(
+                      RouteNames.memberProfile,
+                      pathParameters: {
+                        'householdId': value.id,
+                        'userId': member.isMe ? 'me' : member.userId,
+                      },
+                    ),
+                  ),
                 ],
               ],
             ],

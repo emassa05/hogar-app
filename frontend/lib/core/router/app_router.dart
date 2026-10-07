@@ -21,6 +21,7 @@ import '../../features/households/presentation/screens/household_join_screen.dar
 import '../../features/households/presentation/screens/household_settings_screen.dart';
 import '../../features/households/presentation/screens/household_switch_screen.dart';
 import '../../features/profile/presentation/screens/availability_screen.dart';
+import '../../features/profile/presentation/screens/member_profile_screen.dart';
 import '../../features/profile/presentation/screens/preferences_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/templates/presentation/screens/templates_screen.dart';
@@ -83,6 +84,10 @@ GoRouter appRouter(Ref ref) {
     RouteNames.home: ('/home', AppStrings.home),
     RouteNames.householdSettings: ('/households/settings', AppStrings.home),
     RouteNames.householdSwitch: ('/households/switch', AppStrings.home),
+    RouteNames.memberProfile: (
+      '/households/:householdId/members/:userId/profile',
+      AppStrings.profile,
+    ),
   };
   final router = GoRouter(
     refreshListenable: refresh,
@@ -176,6 +181,10 @@ GoRouter appRouter(Ref ref) {
               RouteNames.home => const HomePlaceholderScreen(),
               RouteNames.householdSettings => const HouseholdSettingsScreen(),
               RouteNames.householdSwitch => const HouseholdSwitchScreen(),
+              RouteNames.memberProfile => MemberProfileScreen(
+                householdId: state.pathParameters['householdId']!,
+                userId: state.pathParameters['userId']!,
+              ),
               _ => AppScaffold(
                 header: StepHeader(title: entry.value.$2),
                 child: const Text(AppStrings.foundation),

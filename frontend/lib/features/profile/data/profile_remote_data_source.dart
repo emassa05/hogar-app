@@ -8,10 +8,12 @@ class ProfileRemoteDataSource {
   const ProfileRemoteDataSource(this.dio);
   final Dio dio;
   String _path(String id) => '/households/$id/members/me';
-  Future<MemberProfileDto> profile(String id) async =>
+  Future<MemberProfileDto> profile(String id, {String userId = 'me'}) async =>
       MemberProfileDto.fromJson(
         ApiResponse.object(
-          (await dio.get<Object?>('${_path(id)}/profile')).data,
+          (await dio.get<Object?>(
+            '/households/$id/members/$userId/profile',
+          )).data,
         ),
       );
   Future<MemberProfileDto> update(

@@ -139,6 +139,11 @@ abstract final class HouseholdStrings {
       'Pronto podrás organizar aquí las tareas de tu hogar.';
   static const myHouseholds = 'Mis hogares';
   static const household = 'Hogar';
+  static const inactiveHousehold =
+      'Este hogar ya no está activo. Vuelve a Hogar para continuar.';
+  static const profilePreview = 'Así te ve el hogar';
+  static const agreedCapacity = 'Capacidad acordada';
+  static const allDay = 'Todo el día';
   static const activeHousehold = 'Hogar activo';
   static const switchHousehold = 'Cambiar a este hogar';
   static const noActiveHousehold =

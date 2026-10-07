@@ -37,11 +37,13 @@ class MemberTile extends StatelessWidget {
     required this.member,
     required this.index,
     this.onAction,
+    this.onPressed,
     super.key,
   });
   final Member member;
   final int index;
   final ValueChanged<MemberAction>? onAction;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -50,122 +52,134 @@ class MemberTile extends StatelessWidget {
     final roleLabel = admin
         ? HouseholdStrings.roleAdmin
         : HouseholdStrings.member;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderSubtle),
-      ),
-      child: Row(
-        children: [
-          MergeSemantics(
-            child: Container(
-              width: 36,
-              height: 36,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: background,
-                shape: BoxShape.circle,
-                border: Border.all(color: border, width: 1.5),
-              ),
-              child: ExcludeSemantics(
-                child: Text(
-                  AvatarCircle.initialsOf(member.displayName),
-                  textScaler: TextScaler.noScaling,
-                  style: AppTypography.labelMedium.copyWith(color: foreground),
-                ),
-              ),
-            ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: MergeSemantics(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          member.displayName,
-                          style: AppTypography.titleSmall,
-                        ),
+          child: Row(
+            children: [
+              MergeSemantics(
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: background,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: border, width: 1.5),
+                  ),
+                  child: ExcludeSemantics(
+                    child: Text(
+                      AvatarCircle.initialsOf(member.displayName),
+                      textScaler: TextScaler.noScaling,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: foreground,
                       ),
-                      if (member.isMe) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.brandSubtle,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            HouseholdStrings.you,
-                            style: AppTypography.labelMedium.copyWith(
-                              color: AppColors.brand,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      if (admin) ...[
-                        const AppIcon(
-                          AppIcons.shield,
-                          color: AppColors.iconBrand,
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      Expanded(
-                        child: Text(
-                          roleLabel,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (onAction != null)
-            PopupMenuButton<MemberAction>(
-              tooltip: HouseholdStrings.memberOptions(member.displayName),
-              icon: const AppIcon(AppIcons.more, color: AppColors.iconTertiary),
-              onSelected: onAction,
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: admin
-                      ? MemberAction.makeMember
-                      : MemberAction.makeAdmin,
-                  child: Text(
-                    admin
-                        ? HouseholdStrings.makeMember
-                        : HouseholdStrings.makeAdmin,
-                    style: AppTypography.bodyMediumStrong,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: MemberAction.remove,
-                  child: Text(
-                    HouseholdStrings.removeMember,
-                    style: AppTypography.bodyMediumStrong.copyWith(
-                      color: AppColors.danger,
                     ),
                   ),
                 ),
-              ],
-            ),
-        ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: MergeSemantics(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              member.displayName,
+                              style: AppTypography.titleSmall,
+                            ),
+                          ),
+                          if (member.isMe) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.brandSubtle,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                HouseholdStrings.you,
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: AppColors.brand,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          if (admin) ...[
+                            const AppIcon(
+                              AppIcons.shield,
+                              color: AppColors.iconBrand,
+                            ),
+                            const SizedBox(width: 6),
+                          ],
+                          Expanded(
+                            child: Text(
+                              roleLabel,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textTertiary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (onAction != null)
+                PopupMenuButton<MemberAction>(
+                  tooltip: HouseholdStrings.memberOptions(member.displayName),
+                  icon: const AppIcon(
+                    AppIcons.more,
+                    color: AppColors.iconTertiary,
+                  ),
+                  onSelected: onAction,
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: admin
+                          ? MemberAction.makeMember
+                          : MemberAction.makeAdmin,
+                      child: Text(
+                        admin
+                            ? HouseholdStrings.makeMember
+                            : HouseholdStrings.makeAdmin,
+                        style: AppTypography.bodyMediumStrong,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: MemberAction.remove,
+                      child: Text(
+                        HouseholdStrings.removeMember,
+                        style: AppTypography.bodyMediumStrong.copyWith(
+                          color: AppColors.danger,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

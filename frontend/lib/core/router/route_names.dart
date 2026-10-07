@@ -20,5 +20,6 @@ abstract final class RouteNames {
   static const householdJoin = 'household-join';
   static const householdSettings = 'household-settings';
   static const householdSwitch = 'household-switch';
+  static const memberProfile = 'member-profile';
   static const home = 'home';
 }
