@@ -138,6 +138,15 @@ abstract final class HouseholdStrings {
   static const homeSoon =
       'Pronto podrás organizar aquí las tareas de tu hogar.';
   static const myHouseholds = 'Mis hogares';
+  static const household = 'Hogar';
+  static const activeHousehold = 'Hogar activo';
+  static const switchHousehold = 'Cambiar a este hogar';
+  static const noActiveHousehold =
+      'No tienes un hogar activo. Elige uno de tus hogares.';
+  static const noHouseholds = 'Todavía no perteneces a ningún hogar.';
+  static const noMembers = 'No hay integrantes para mostrar.';
+  static String householdCount(int count) =>
+      'Perteneces a $count ${count == 1 ? 'hogar' : 'hogares'}';
   static const weekdays = [
     'Lunes',
     'Martes',

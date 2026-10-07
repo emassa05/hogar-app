@@ -18,6 +18,8 @@ import '../../features/households/presentation/screens/household_choice_screen.d
 import '../../features/households/presentation/screens/household_create_screen.dart';
 import '../../features/households/presentation/screens/household_invite_screen.dart';
 import '../../features/households/presentation/screens/household_join_screen.dart';
+import '../../features/households/presentation/screens/household_settings_screen.dart';
+import '../../features/households/presentation/screens/household_switch_screen.dart';
 import '../../features/profile/presentation/screens/availability_screen.dart';
 import '../../features/profile/presentation/screens/preferences_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -79,6 +81,8 @@ GoRouter appRouter(Ref ref) {
     ),
     RouteNames.householdJoin: ('/households/join', AppStrings.chooseHousehold),
     RouteNames.home: ('/home', AppStrings.home),
+    RouteNames.householdSettings: ('/households/settings', AppStrings.home),
+    RouteNames.householdSwitch: ('/households/switch', AppStrings.home),
   };
   final router = GoRouter(
     refreshListenable: refresh,
@@ -170,6 +174,8 @@ GoRouter appRouter(Ref ref) {
                 householdId: state.pathParameters['householdId']!,
               ),
               RouteNames.home => const HomePlaceholderScreen(),
+              RouteNames.householdSettings => const HouseholdSettingsScreen(),
+              RouteNames.householdSwitch => const HouseholdSwitchScreen(),
               _ => AppScaffold(
                 header: StepHeader(title: entry.value.$2),
                 child: const Text(AppStrings.foundation),

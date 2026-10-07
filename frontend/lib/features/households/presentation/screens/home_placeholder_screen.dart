@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_icon.dart';
 import '../household_controller.dart';
@@ -63,6 +66,11 @@ class HomePlaceholderScreen extends ConsumerWidget {
                 style: AppTypography.dataSmall,
               ),
             ],
+            const SizedBox(height: 16),
+            SecondaryButton(
+              label: HouseholdStrings.household,
+              onPressed: () => context.pushNamed(RouteNames.householdSettings),
+            ),
           ],
         ),
       ),
