@@ -13,6 +13,7 @@ import '../../features/auth/presentation/screens/name_screen.dart';
 import '../../features/auth/presentation/screens/password_screen.dart';
 import '../../features/auth/presentation/screens/phone_screen.dart';
 import '../../features/auth/presentation/screens/welcome_screen.dart';
+import '../../features/capacity/presentation/screens/capacity_screen.dart';
 import '../../features/households/presentation/screens/home_placeholder_screen.dart';
 import '../../features/households/presentation/screens/household_choice_screen.dart';
 import '../../features/households/presentation/screens/household_create_screen.dart';
@@ -43,6 +44,7 @@ GoRouter appRouter(Ref ref) {
   ref.listen(sessionControllerProvider, (previous, next) => refresh.update());
   ref.listen(authControllerProvider, (previous, next) => refresh.update());
   final routes = <String, (String, String)>{
+    RouteNames.capacity: ('/households/:householdId/capacity', AppStrings.home),
     RouteNames.welcome: ('/', AppStrings.appName),
     RouteNames.registerPhone: ('/register/phone', AppStrings.register),
     RouteNames.registerCode: ('/register/code', AppStrings.register),
@@ -161,6 +163,9 @@ GoRouter appRouter(Ref ref) {
             name: entry.key,
             path: entry.value.$1,
             builder: (context, state) => switch (entry.key) {
+              RouteNames.capacity => CapacityScreen(
+                householdId: state.pathParameters['householdId']!,
+              ),
               RouteNames.welcome => const WelcomeScreen(),
               RouteNames.registerPhone => const PhoneScreen(),
               RouteNames.registerCode => const CodeScreen(),

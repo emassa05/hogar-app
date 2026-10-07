@@ -23,6 +23,7 @@ class RestrictionInput {
 abstract interface class ProfileRepository {
   Future<Result<MemberProfile>> profile(String id, {String userId = 'me'});
   Future<Result<MemberProfile>> updateNickname(String id, String? nickname);
+  Future<Result<MemberProfile>> updateCapacity(String id, int capacity);
   Future<Result<MemberProfile>> update(
     String id,
     String? nickname,

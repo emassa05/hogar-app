@@ -13,12 +13,20 @@ class CapacityCard extends StatelessWidget {
     required this.onChanged,
     this.errorText,
     this.enabled = true,
+    this.title = HouseholdStrings.capacity,
+    this.helpText = HouseholdStrings.capacityHelp,
+    this.leading,
+    this.divisions = 20,
     super.key,
   });
   final int? value;
   final ValueChanged<int> onChanged;
   final String? errorText;
   final bool enabled;
+  final String title;
+  final String? helpText;
+  final Widget? leading;
+  final int divisions;
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +45,8 @@ class CapacityCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
-                child: Text(
-                  HouseholdStrings.capacity,
-                  style: AppTypography.titleSmall,
-                ),
-              ),
+              if (leading != null) ...[leading!, const SizedBox(width: 10)],
+              Expanded(child: Text(title, style: AppTypography.titleSmall)),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -71,7 +75,7 @@ class CapacityCard extends StatelessWidget {
             child: Slider(
               value: (value ?? 0).toDouble(),
               max: 100,
-              divisions: 20,
+              divisions: divisions,
               semanticFormatterCallback: (value) =>
                   HouseholdStrings.percent(value.round()),
               onChanged: enabled ? (next) => onChanged(next.round()) : null,
@@ -90,13 +94,15 @@ class CapacityCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          Text(
-            HouseholdStrings.capacityHelp,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textTertiary,
+          if (helpText != null) ...[
+            const SizedBox(height: 14),
+            Text(
+              helpText!,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textTertiary,
+              ),
             ),
-          ),
+          ],
           if (errorText != null) ...[
             const SizedBox(height: 8),
             FieldMessage.error(errorText!),

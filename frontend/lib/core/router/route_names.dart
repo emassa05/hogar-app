@@ -25,4 +25,5 @@ abstract final class RouteNames {
   static const householdEdit = 'household-edit';
   static const settingsInvite = 'settings-invite';
   static const home = 'home';
+  static const capacity = 'capacity';
 }

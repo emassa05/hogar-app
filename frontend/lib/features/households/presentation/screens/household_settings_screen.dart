@@ -14,6 +14,7 @@ import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_icon.dart';
 import '../../../../core/widgets/avatar_circle.dart';
+import '../../../capacity/presentation/capacity_strings.dart';
 import '../../domain/household_entities.dart';
 import '../household_controller.dart';
 import '../household_strings.dart';
@@ -217,6 +218,20 @@ class HouseholdSettingsScreen extends ConsumerWidget {
                     : () => context.pushNamed(RouteNames.householdSwitch),
               ),
               if (value != null) ...[
+                const SizedBox(height: 16),
+                OptionCard(
+                  icon: AppIcons.handHeart,
+                  iconBackground: AppColors.brandSubtle,
+                  iconColor: AppColors.iconBrand,
+                  title: CapacityStrings.entry,
+                  description: CapacityStrings.entryHelp,
+                  onPressed: flow.busy
+                      ? null
+                      : () => context.pushNamed(
+                          RouteNames.capacity,
+                          pathParameters: {'householdId': value.id},
+                        ),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   key: membersKey,

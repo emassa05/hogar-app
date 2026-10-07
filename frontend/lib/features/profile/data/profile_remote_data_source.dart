@@ -37,6 +37,28 @@ class ProfileRemoteDataSource {
           )).data,
         ),
       );
+  Future<MemberProfileDto> updateCapacity(String id, int capacity) async {
+    final json = ApiResponse.object(
+      (await dio.patch<Object?>(
+        '${_path(id)}/profile',
+        data: {'proposed_capacity_percent': capacity},
+      )).data,
+    );
+    for (final field in [
+      'proposed_capacity_percent',
+      'approved_capacity_percent',
+    ]) {
+      final value = json[field];
+      if (!json.containsKey(field) ||
+          value != null && (value is! int || value < 0 || value > 100)) {
+        throw const FormatException(
+          'Expected nullable integer capacity percent',
+        );
+      }
+    }
+    return MemberProfileDto.fromJson(json);
+  }
+
   Future<AvailabilityDto> availability(String id, Availability value) async =>
       AvailabilityDto.fromJson(
         ApiResponse.object(
