@@ -16,6 +16,7 @@ class CapacityDistribution(UuidPrimaryKeyMixin, Base):
 
     household_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("households.id", ondelete="CASCADE"))
     membership_version: Mapped[int]
+    replaces_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("capacity_distributions.id"))
     effective_from: Mapped[date]
     approved_at: Mapped[datetime]
     approved_by: Mapped[dict[str, Any]] = mapped_column(JSON)

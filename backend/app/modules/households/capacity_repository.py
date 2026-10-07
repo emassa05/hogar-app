@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 from sqlalchemy import select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.modules.households.capacity_models import CapacityDistribution
 
@@ -14,11 +15,15 @@ class CapacityRepository:
     async def applicable(
         self, household_id: uuid.UUID, membership_version: int, today: date, *, upcoming: bool
     ) -> CapacityDistribution | None:
+        replacement = aliased(CapacityDistribution)
         return await self.session.scalar(
             select(CapacityDistribution)
             .where(
                 CapacityDistribution.household_id == household_id,
                 CapacityDistribution.membership_version == membership_version,
+                ~select(replacement.id)
+                .where(replacement.replaces_id == CapacityDistribution.id)
+                .exists(),
                 CapacityDistribution.effective_from > today
                 if upcoming
                 else CapacityDistribution.effective_from <= today,

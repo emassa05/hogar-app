@@ -79,7 +79,14 @@ class CapacityService:
             )
         references = {user.id: member_reference(membership, user) for membership, user in members}
         today = today_in(context.household.timezone)
+        pending = await self.capacities.applicable(
+            context.household.id,
+            context.household.capacity_membership_version,
+            today,
+            upcoming=True,
+        )
         distribution = CapacityDistribution(
+            replaces_id=pending.id if pending else None,
             id=uuid.uuid4(),
             household_id=context.household.id,
             membership_version=context.household.capacity_membership_version,

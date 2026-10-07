@@ -558,6 +558,82 @@ async def test_approval_failure_after_flush_rolls_back_every_effect(
     assert retry.status_code == 201
 
 
+async def test_replaced_upcoming_never_activates_after_timezone_week_changes(
+    client: AsyncClient,
+    marta: RegisteredUser,
+    pablo: RegisteredUser,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    household = await create_household(client, marta, timezone="Pacific/Kiritimati")
+    await join_household(client, pablo, marta, household["id"])
+    moment = datetime(2026, 10, 11, 12, tzinfo=UTC)
+    monkeypatch.setattr("app.common.clock.utc_now", lambda: moment)
+    path = f"/households/{household['id']}/capacity"
+    first = (
+        await client.post(
+            f"{path}/distributions",
+            json=allocations((marta, 30), (pablo, 70)),
+            headers=idempotency_headers(marta),
+        )
+    ).json()
+    assert first["effective_from"] == "2026-10-19"
+    changed = await client.patch(
+        f"/households/{household['id']}",
+        json={"version": 1, "timezone": "America/Santiago"},
+        headers=marta.headers,
+    )
+    assert changed.status_code == 200
+    second = (
+        await client.post(
+            f"{path}/distributions",
+            json=allocations((marta, 40), (pablo, 60)),
+            headers=idempotency_headers(marta),
+        )
+    ).json()
+    assert second["effective_from"] == "2026-10-12"
+    assert (await client.get(path, headers=marta.headers)).json()["upcoming"] == second
+    freeze_day(monkeypatch, date(2026, 10, 19))
+    overview = (await client.get(path, headers=marta.headers)).json()
+    assert overview["current"] == second
+    assert overview["upcoming"] is None
+    history = (await client.get(f"{path}/distributions", headers=marta.headers)).json()["items"]
+    assert history == [second, first]
+
+
+async def test_same_timestamp_replacement_does_not_depend_on_uuid_order(
+    client: AsyncClient,
+    marta: RegisteredUser,
+    pablo: RegisteredUser,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    household = await create_household(client, marta)
+    await join_household(client, pablo, marta, household["id"])
+    monkeypatch.setattr(
+        "app.modules.households.capacity_service.utc_now",
+        lambda: datetime(2026, 10, 7, 12, tzinfo=UTC),
+    )
+    freeze_day(monkeypatch, date(2026, 10, 7))
+    path = f"/households/{household['id']}/capacity"
+    first = (
+        await client.post(
+            f"{path}/distributions",
+            json=allocations((marta, 30), (pablo, 70)),
+            headers=idempotency_headers(marta),
+        )
+    ).json()
+    second = (
+        await client.post(
+            f"{path}/distributions",
+            json=allocations((marta, 40), (pablo, 60)),
+            headers=idempotency_headers(marta),
+        )
+    ).json()
+    assert first["approved_at"] == second["approved_at"]
+    assert (await client.get(path, headers=marta.headers)).json()["upcoming"] == second
+    freeze_day(monkeypatch, date(2026, 10, 12))
+    assert (await client.get(path, headers=marta.headers)).json()["current"] == second
+
+
 async def test_approval_requires_idempotency_key(
     client: AsyncClient, marta: RegisteredUser
 ) -> None:
