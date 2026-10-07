@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/session/session_controller.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/avatar_circle.dart';
 import '../../../households/domain/household_entities.dart';
@@ -68,6 +69,17 @@ class MemberProfileScreen extends ConsumerWidget {
                               ? HouseholdStrings.roleAdmin
                               : HouseholdStrings.member,
                         ),
+                        if (value.isMe) ...[
+                          const SizedBox(height: 16),
+                          SecondaryButton(
+                            label: HouseholdStrings.editProfile,
+                            expand: false,
+                            onPressed: () => context.pushNamed(
+                              RouteNames.profileEdit,
+                              pathParameters: {'householdId': householdId},
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

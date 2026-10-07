@@ -16,7 +16,14 @@ class OverlineDivider extends StatelessWidget {
       children: [
         const Expanded(child: Divider(color: AppColors.borderSubtle)),
         const SizedBox(width: 10),
-        Text(label, style: AppTypography.overline),
+        Flexible(
+          flex: 8,
+          child: Text(
+            label,
+            style: AppTypography.overline,
+            textAlign: TextAlign.center,
+          ),
+        ),
         const SizedBox(width: 10),
         const Expanded(child: Divider(color: AppColors.borderSubtle)),
       ],

@@ -82,4 +82,12 @@ class AuthRemoteDataSource {
       data: {'refresh_token': refreshToken},
     );
   }
+
+  Future<SessionUser> updateIdentity(String name, AvatarChoice? avatar) async =>
+      SessionUser.fromJson(
+        (await client.patch<Map<String, dynamic>>(
+          '/users/me',
+          data: {'name': name, 'avatar': avatar?.name},
+        )).data!,
+      );
 }

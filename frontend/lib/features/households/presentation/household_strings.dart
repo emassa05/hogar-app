@@ -144,6 +144,14 @@ abstract final class HouseholdStrings {
   static const profilePreview = 'Así te ve el hogar';
   static const agreedCapacity = 'Capacidad acordada';
   static const allDay = 'Todo el día';
+  static const editProfile = 'Editar perfil';
+  static const foreignProfileReadOnly = 'Solo puedes editar tu propio perfil.';
+  static const accountName = 'Nombre de tu cuenta';
+  static const accountNameHelp = 'Se usa en toda la aplicación.';
+  static const householdNickname = 'Apodo en este hogar';
+  static const accountIdentitySaved =
+      'El nombre y el personaje de tu cuenta están guardados. Falta guardar el apodo de este hogar.';
+  static const saveChanges = 'Guardar cambios';
   static const activeHousehold = 'Hogar activo';
   static const switchHousehold = 'Cambiar a este hogar';
   static const noActiveHousehold =

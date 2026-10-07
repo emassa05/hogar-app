@@ -25,5 +25,6 @@ abstract interface class AuthRepository {
   );
   Future<Result<SessionUser>> currentUser();
   Future<Result<SessionUser>> updateAvatar(AvatarChoice? avatar);
+  Future<Result<SessionUser>> updateIdentity(String name, AvatarChoice? avatar);
   Future<Result<void>> logout(String refreshToken);
 }

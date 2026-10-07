@@ -28,6 +28,15 @@ class ProfileRemoteDataSource {
       )).data,
     ),
   );
+  Future<MemberProfileDto> updateNickname(String id, String? nickname) async =>
+      MemberProfileDto.fromJson(
+        ApiResponse.object(
+          (await dio.patch<Object?>(
+            '${_path(id)}/profile',
+            data: {'nickname': nickname},
+          )).data,
+        ),
+      );
   Future<AvailabilityDto> availability(String id, Availability value) async =>
       AvailabilityDto.fromJson(
         ApiResponse.object(

@@ -16,6 +16,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
         () async => (await remote.profile(id, userId: userId)).toDomain(),
       );
   @override
+  Future<Result<MemberProfile>> updateNickname(String id, String? nickname) =>
+      capture(
+        () async => (await remote.updateNickname(id, nickname)).toDomain(),
+      );
+  @override
   Future<Result<MemberProfile>> update(
     String id,
     String? nickname,

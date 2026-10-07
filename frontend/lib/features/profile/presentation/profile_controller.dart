@@ -7,10 +7,12 @@ import '../../../core/session/session_controller.dart';
 import '../../../core/session/session_operation.dart';
 import '../../../core/session/session_user.dart';
 import '../../auth/data/auth_repository_impl.dart';
+import '../../households/presentation/household_controller.dart';
 import '../../households/presentation/household_strings.dart';
 import '../data/profile_repository_impl.dart';
 import '../domain/profile_entities.dart';
 import '../domain/profile_repository.dart';
+import 'member_profile_provider.dart';
 import 'profile_view_state.dart';
 part 'profile_controller.g.dart';
 
@@ -105,6 +107,66 @@ class ProfileController extends _$ProfileController {
   }
 
   Future<bool> reload() => _run(_reload);
+  void _checkIdentity(SessionOperation operation) {
+    operation.checkCurrent();
+    if (ref.read(sessionControllerProvider).user?.activeHouseholdId !=
+            householdId ||
+        !state.requireValue.profile.isMe) {
+      throw const NetworkException(NetworkFailure.cancelled);
+    }
+  }
+
+  Future<bool> saveIdentity(
+    String name,
+    String nickname,
+    AvatarChoice? avatar,
+  ) {
+    final priorSavedPart = state.valueOrNull?.savedPart ?? '';
+    return _run((operation) async {
+      _checkIdentity(operation);
+      if (priorSavedPart == HouseholdStrings.accountIdentitySaved) {
+        state = AsyncData(
+          state.requireValue.copyWith(savedPart: priorSavedPart),
+        );
+      }
+      final user = ref.read(sessionControllerProvider).user!;
+      final normalizedName = name.trim();
+      final normalizedNickname = nickname.trim().isEmpty
+          ? null
+          : nickname.trim();
+      if (normalizedName != user.name || avatar != user.avatar) {
+        final updated =
+            (await ref
+                    .read(authRepositoryProvider)
+                    .updateIdentity(normalizedName, avatar))
+                .valueOrThrow;
+        _checkIdentity(operation);
+        ref.read(sessionControllerProvider.notifier).confirmUser(updated);
+        _confirm(
+          operation,
+          state.requireValue.profile.copyWith(
+            name: updated.name,
+            avatar: updated.avatar,
+          ),
+          savedPart: HouseholdStrings.accountIdentitySaved,
+        );
+        ref.invalidate(activeHouseholdProvider);
+        ref.invalidate(memberProfileProvider);
+      }
+      if (normalizedNickname != state.requireValue.profile.nickname) {
+        final profile =
+            (await ref
+                    .read(profileRepositoryProvider)
+                    .updateNickname(householdId, normalizedNickname))
+                .valueOrThrow;
+        _checkIdentity(operation);
+        _confirm(operation, profile);
+        ref.invalidate(activeHouseholdProvider);
+        ref.invalidate(memberProfileProvider);
+      }
+    });
+  }
+
   Future<bool> saveProfile(
     String? nickname,
     int? capacity,

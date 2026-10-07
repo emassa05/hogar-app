@@ -23,6 +23,7 @@ import '../../features/households/presentation/screens/household_switch_screen.d
 import '../../features/profile/presentation/screens/availability_screen.dart';
 import '../../features/profile/presentation/screens/member_profile_screen.dart';
 import '../../features/profile/presentation/screens/preferences_screen.dart';
+import '../../features/profile/presentation/screens/profile_edit_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/templates/presentation/screens/templates_screen.dart';
 import '../l10n/app_strings.dart';
@@ -86,6 +87,10 @@ GoRouter appRouter(Ref ref) {
     RouteNames.householdSwitch: ('/households/switch', AppStrings.home),
     RouteNames.memberProfile: (
       '/households/:householdId/members/:userId/profile',
+      AppStrings.profile,
+    ),
+    RouteNames.profileEdit: (
+      '/households/:householdId/profile/edit',
       AppStrings.profile,
     ),
   };
@@ -184,6 +189,9 @@ GoRouter appRouter(Ref ref) {
               RouteNames.memberProfile => MemberProfileScreen(
                 householdId: state.pathParameters['householdId']!,
                 userId: state.pathParameters['userId']!,
+              ),
+              RouteNames.profileEdit => ProfileEditScreen(
+                householdId: state.pathParameters['householdId']!,
               ),
               _ => AppScaffold(
                 header: StepHeader(title: entry.value.$2),

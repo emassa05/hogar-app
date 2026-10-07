@@ -61,6 +61,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<SessionUser>> updateAvatar(AvatarChoice? avatar) =>
       capture(() => remote.updateAvatar(avatar));
   @override
+  Future<Result<SessionUser>> updateIdentity(
+    String name,
+    AvatarChoice? avatar,
+  ) => capture(() => remote.updateIdentity(name, avatar));
+  @override
   Future<Result<void>> logout(String refreshToken) =>
       capture(() => remote.logout(refreshToken));
 }
