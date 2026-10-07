@@ -12,7 +12,7 @@ from app.common.errors import (
     NotFoundError,
     PreconditionFailedError,
 )
-from app.modules.households.dependencies import HouseholdContext
+from app.modules.households.dependencies import HouseholdContext, lock_household_context
 from app.modules.households.invitation_codes import display_code, generate_code, normalize_code
 from app.modules.households.models import Household, Invitation, Membership, Role
 from app.modules.households.repository import HouseholdRepository
@@ -136,6 +136,7 @@ class HouseholdService:
 
     async def accept_invitation(self, user: User, raw_code: str) -> HouseholdDetailResponse:
         _, household = await self._valid_invitation(raw_code)
+        await self.households.lock(household.id)
         if await self.households.active_membership(household.id, user.id) is not None:
             raise ConflictError(
                 ErrorCode.ALREADY_MEMBER,
@@ -148,12 +149,14 @@ class HouseholdService:
             )
         )
         user.active_household_id = household.id
+        await self.households.advance_capacity_membership(household.id)
         await self.session.commit()
         return await self.detail(household, membership, user)
 
     async def change_role(
         self, context: HouseholdContext, target_user_id: uuid.UUID, role: Role
     ) -> MemberResponse:
+        context = await lock_household_context(context, self.session)
         context.require_admin()
         admin_ids = await self.households.lock_admin_ids(context.household.id)
         target = await self._target_member(context, target_user_id)
@@ -167,6 +170,7 @@ class HouseholdService:
         return member_response(target, target_user, context.user.id)
 
     async def remove_member(self, context: HouseholdContext, target_user_id: uuid.UUID) -> None:
+        context = await lock_household_context(context, self.session)
         context.require_admin()
         if target_user_id == context.user.id:
             raise ConflictError(message="Use the leave endpoint to exit the household.")
@@ -175,6 +179,7 @@ class HouseholdService:
         await self.session.commit()
 
     async def leave(self, context: HouseholdContext) -> None:
+        context = await lock_household_context(context, self.session)
         admin_ids = await self.households.lock_admin_ids(context.household.id)
         if context.is_admin and admin_ids == [context.user.id]:
             raise last_admin_error()
@@ -183,6 +188,7 @@ class HouseholdService:
 
     async def _end_membership(self, membership: Membership) -> None:
         membership.left_at = utc_now()
+        await self.households.advance_capacity_membership(membership.household_id)
         await self.households.clear_active_household(membership.user_id, membership.household_id)
 
     async def _target_member(self, context: HouseholdContext, user_id: uuid.UUID) -> Membership:

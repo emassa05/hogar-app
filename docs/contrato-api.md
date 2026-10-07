@@ -909,6 +909,10 @@ Aprueba un reparto completo. Se aplica desde el lunes siguiente en la zona del h
 
 Un reparto aprobado para el próximo periodo y todavía no vigente se reemplaza si se aprueba otro.
 
+Si cambia la composición del hogar, los repartos vigentes o programados que dejan de incluir exactamente a todos los integrantes activos quedan inaplicables. No se ajustan porcentajes ni se aprueba un reparto automáticamente. El historial de aprobaciones se conserva sin modificar y un reparto inaplicable no vuelve a activarse si posteriormente se restaura la composición anterior.
+
+En `CapacityOverview`, `current` y `upcoming` son null cuando el reparto correspondiente es inaplicable; `status` es `configured` solo si existe un reparto vigente aplicable. Mientras no lo haya, `approved_capacity_percent` es null en los perfiles. Un nuevo reparto completo requiere aprobación de un administrador y comienza el lunes siguiente en la zona del hogar, incluso si la capacidad quedó sin configurar durante la semana.
+
 #### `GET /households/{household_id}/capacity/distributions`
 
 Historial de repartos, del más reciente al más antiguo. Paginado.

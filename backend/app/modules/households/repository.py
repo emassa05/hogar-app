@@ -32,15 +32,32 @@ class HouseholdRepository:
     async def get(self, household_id: uuid.UUID) -> Household | None:
         return await self.session.get(Household, household_id)
 
+    async def lock(self, household_id: uuid.UUID) -> Household | None:
+        return await self.session.scalar(
+            select(Household)
+            .where(Household.id == household_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+
+    async def advance_capacity_membership(self, household_id: uuid.UUID) -> None:
+        await self.session.execute(
+            update(Household)
+            .where(Household.id == household_id)
+            .values(capacity_membership_version=Household.capacity_membership_version + 1)
+        )
+
     async def active_membership(
         self, household_id: uuid.UUID, user_id: uuid.UUID
     ) -> Membership | None:
         return await self.session.scalar(
-            select(Membership).where(
+            select(Membership)
+            .where(
                 Membership.household_id == household_id,
                 Membership.user_id == user_id,
                 Membership.left_at.is_(None),
             )
+            .execution_options(populate_existing=True)
         )
 
     async def memberships_of_user(

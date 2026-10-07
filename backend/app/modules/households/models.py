@@ -54,6 +54,7 @@ class Household(UuidPrimaryKeyMixin, TimestampMixin, Base):
     timezone: Mapped[str] = mapped_column(String(64))
     imbalance_threshold_percent: Mapped[int | None] = mapped_column(SmallInteger)
     version: Mapped[int] = mapped_column(default=1)
+    capacity_membership_version: Mapped[int] = mapped_column(default=0, server_default="0")
 
     __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
 

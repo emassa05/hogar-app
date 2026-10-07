@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.clock import today_in, utc_now
 from app.common.errors import ConflictError, ErrorCode, NotFoundError, ValidationFailedError
 from app.modules.catalog.data import ACTIVITIES_BY_KEY, CATEGORIES_BY_KEY
-from app.modules.households.dependencies import HouseholdContext
+from app.modules.households.capacity_service import CapacityService
+from app.modules.households.dependencies import HouseholdContext, lock_household_context
 from app.modules.households.models import (
     AvailabilityException,
     AvailabilitySlot,
@@ -36,12 +37,15 @@ class ProfileService:
         self.households = HouseholdRepository(session)
 
     async def get(self, context: HouseholdContext, user_id: uuid.UUID) -> MemberProfileResponse:
+        context = await lock_household_context(context, self.session)
         membership, user = await self._load(context, user_id)
-        return self._response(context, membership, user)
+        approved_percent = await CapacityService(self.session).approved_percent(context, user_id)
+        return self._response(context, membership, user, approved_percent)
 
     async def update(
         self, context: HouseholdContext, request: UpdateProfileRequest
     ) -> MemberProfileResponse:
+        context = await lock_household_context(context, self.session)
         membership = context.membership
         for field, value in request.model_dump(exclude_unset=True).items():
             setattr(membership, field, value)
@@ -138,7 +142,11 @@ class ProfileService:
         return loaded
 
     def _response(
-        self, context: HouseholdContext, membership: Membership, user: User
+        self,
+        context: HouseholdContext,
+        membership: Membership,
+        user: User,
+        approved_percent: int | None,
     ) -> MemberProfileResponse:
         timezone = context.household.timezone
         return MemberProfileResponse(
@@ -149,7 +157,7 @@ class ProfileService:
             role=membership.role,
             is_me=user.id == context.user.id,
             proposed_capacity_percent=membership.proposed_capacity_percent,
-            approved_capacity_percent=None,
+            approved_capacity_percent=approved_percent,
             availability=availability_schema(membership),
             restrictions=[
                 restriction_response(

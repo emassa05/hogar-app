@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.database import SessionDependency
 from app.common.errors import ErrorCode, ForbiddenError, NotFoundError, ValidationFailedError
@@ -45,6 +46,17 @@ async def get_household_context(
 
 
 HouseholdAccess = Annotated[HouseholdContext, Depends(get_household_context)]
+
+
+async def lock_household_context(
+    context: HouseholdContext, session: AsyncSession
+) -> HouseholdContext:
+    repository = HouseholdRepository(session)
+    household = await repository.lock(context.household.id)
+    membership = await repository.active_membership(context.household.id, context.user.id)
+    if household is None or membership is None:
+        raise household_not_found()
+    return HouseholdContext(household=household, membership=membership, user=context.user)
 
 
 def resolve_member_id(raw: str, context: HouseholdContext) -> uuid.UUID:

@@ -7,6 +7,7 @@ from app.modules.auth.models import (
     RefreshToken,
     SmsDispatch,
 )
+from app.modules.households.capacity_models import CapacityDistribution
 from app.modules.households.models import (
     AvailabilityException,
     AvailabilitySlot,
@@ -25,6 +26,7 @@ __all__ = [
     "AuthSession",
     "AvailabilityException",
     "AvailabilitySlot",
+    "CapacityDistribution",
     "Household",
     "IdempotencyRecord",
     "Invitation",

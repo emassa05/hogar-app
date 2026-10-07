@@ -28,7 +28,7 @@ def _validate_timezone(value: str) -> str:
 
 TimeZoneName = Annotated[str, StringConstraints(max_length=64), AfterValidator(_validate_timezone)]
 Nickname = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=40)]
-Percent = Annotated[int, Field(ge=0, le=100)]
+Percent = Annotated[int, Field(strict=True, ge=0, le=100)]
 Weekday = Annotated[int, Field(ge=0, le=6)]
 CatalogKey = Annotated[str, StringConstraints(min_length=1, max_length=40)]
 
