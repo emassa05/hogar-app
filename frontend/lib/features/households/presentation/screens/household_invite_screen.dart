@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/motion/app_haptics.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../core/session/session_controller.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/validation/validators.dart';
 import '../../../../core/widgets/app_buttons.dart';
@@ -23,8 +24,13 @@ import '../widgets/invitation_code_card.dart';
 import '../widgets/member_tile.dart';
 
 class HouseholdInviteScreen extends ConsumerStatefulWidget {
-  const HouseholdInviteScreen({required this.householdId, super.key});
+  const HouseholdInviteScreen({
+    required this.householdId,
+    this.settingsMode = false,
+    super.key,
+  });
   final String householdId;
+  final bool settingsMode;
   @override
   ConsumerState<HouseholdInviteScreen> createState() =>
       _HouseholdInviteScreenState();
@@ -37,8 +43,16 @@ class _HouseholdInviteScreenState extends ConsumerState<HouseholdInviteScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_load()));
   }
 
-  Future<void> _load() =>
-      ref.read(householdControllerProvider.notifier).load(widget.householdId);
+  Future<void> _load() async {
+    if (widget.settingsMode &&
+        ref.read(sessionControllerProvider).user?.activeHouseholdId !=
+            widget.householdId) {
+      return;
+    }
+    await ref
+        .read(householdControllerProvider.notifier)
+        .load(widget.householdId);
+  }
 
   Future<void> _copy(String code) async {
     await Clipboard.setData(
@@ -103,14 +117,24 @@ class _HouseholdInviteScreenState extends ConsumerState<HouseholdInviteScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(householdControllerProvider);
-    final household = state.household?.id == widget.householdId
+    final activeId = ref.watch(
+      sessionControllerProvider.select(
+        (value) => value.user?.activeHouseholdId,
+      ),
+    );
+    final household =
+        state.household?.id == widget.householdId &&
+            (!widget.settingsMode || activeId == widget.householdId)
         ? state.household
         : null;
     final invitation = state.invitation;
     final admin = household?.myRole == MemberRole.admin;
     return HouseholdLayout(
       title: HouseholdStrings.invite,
-      step: 2,
+      step: widget.settingsMode ? null : 2,
+      onBack: widget.settingsMode
+          ? () => context.goNamed(RouteNames.householdSettings)
+          : null,
       busy: state.busy,
       trailing: household != null && invitation != null
           ? HeaderIconButton(
@@ -120,16 +144,22 @@ class _HouseholdInviteScreenState extends ConsumerState<HouseholdInviteScreen> {
             )
           : null,
       footer: PrimaryButton(
-        label: HouseholdStrings.continueLabel,
+        label: widget.settingsMode
+            ? HouseholdStrings.done
+            : HouseholdStrings.continueLabel,
         compact: true,
         onPressed: household == null || state.busy
             ? null
+            : widget.settingsMode
+            ? () => context.goNamed(RouteNames.householdSettings)
             : () => context.pushNamed(
                 RouteNames.householdProfile,
                 pathParameters: {'householdId': widget.householdId},
               ),
       ),
-      child: household == null
+      child: widget.settingsMode && activeId != widget.householdId
+          ? const Text(HouseholdStrings.inactiveHousehold)
+          : household == null
           ? LoadPlaceholder(
               error: state.busy ? null : state.error,
               onRetry: () => unawaited(_load()),
@@ -154,6 +184,10 @@ class _HouseholdInviteScreenState extends ConsumerState<HouseholdInviteScreen> {
                 ],
                 const SizedBox(height: 18),
                 if (admin) ...[
+                  if (widget.settingsMode)
+                    const InfoBanner(
+                      message: HouseholdStrings.invitationRevocation,
+                    ),
                   Semantics(
                     header: true,
                     child: const Text(

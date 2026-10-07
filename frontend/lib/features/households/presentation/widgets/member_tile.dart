@@ -38,12 +38,16 @@ class MemberTile extends StatelessWidget {
     required this.index,
     this.onAction,
     this.onPressed,
+    this.canRemove = true,
+    this.canChangeRole = true,
     super.key,
   });
   final Member member;
   final int index;
   final ValueChanged<MemberAction>? onAction;
   final VoidCallback? onPressed;
+  final bool canRemove;
+  final bool canChangeRole;
 
   @override
   Widget build(BuildContext context) {
@@ -155,26 +159,28 @@ class MemberTile extends StatelessWidget {
                   ),
                   onSelected: onAction,
                   itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: admin
-                          ? MemberAction.makeMember
-                          : MemberAction.makeAdmin,
-                      child: Text(
-                        admin
-                            ? HouseholdStrings.makeMember
-                            : HouseholdStrings.makeAdmin,
-                        style: AppTypography.bodyMediumStrong,
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: MemberAction.remove,
-                      child: Text(
-                        HouseholdStrings.removeMember,
-                        style: AppTypography.bodyMediumStrong.copyWith(
-                          color: AppColors.danger,
+                    if (canChangeRole)
+                      PopupMenuItem(
+                        value: admin
+                            ? MemberAction.makeMember
+                            : MemberAction.makeAdmin,
+                        child: Text(
+                          admin
+                              ? HouseholdStrings.makeMember
+                              : HouseholdStrings.makeAdmin,
+                          style: AppTypography.bodyMediumStrong,
                         ),
                       ),
-                    ),
+                    if (canRemove)
+                      PopupMenuItem(
+                        value: MemberAction.remove,
+                        child: Text(
+                          HouseholdStrings.removeMember,
+                          style: AppTypography.bodyMediumStrong.copyWith(
+                            color: AppColors.danger,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
             ],

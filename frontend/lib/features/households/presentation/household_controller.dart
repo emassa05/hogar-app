@@ -146,6 +146,31 @@ class HouseholdController extends _$HouseholdController {
     operation.checkCurrent();
     state = state.copyWith(invitation: invitation);
   });
+  Future<bool> refreshConfirmedHousehold(String id) async {
+    if (!_canStart ||
+        ref.read(sessionControllerProvider).user?.activeHouseholdId != id) {
+      return false;
+    }
+    final userId = ref.read(sessionControllerProvider).user?.id;
+    final epoch = ref.read(sessionControllerProvider.notifier).epoch;
+    final savedPart = state.savedPart;
+    final loaded = await load(id, includeInvitation: false);
+    final user = ref.read(sessionControllerProvider).user;
+    if (!_alive ||
+        state.household?.id != id ||
+        user?.id != userId ||
+        user?.activeHouseholdId != id ||
+        ref.read(sessionControllerProvider.notifier).epoch != epoch) {
+      return false;
+    }
+    if (loaded) {
+      ref.invalidate(activeHouseholdProvider);
+    } else {
+      state = state.copyWith(savedPart: savedPart);
+    }
+    return loaded;
+  }
+
   Future<bool> preview(String code) {
     if (state.busy && _pendingPreviewCode == null) return Future.value(false);
     clearPreview();
@@ -289,9 +314,11 @@ Future<List<HouseholdSummary>> householdList(Ref ref) async {
 
 @riverpod
 Future<HouseholdDetail?> activeHousehold(Ref ref) async {
-  final id = ref.watch(
-    sessionControllerProvider.select((value) => value.user?.activeHouseholdId),
+  final (userId, id) = ref.watch(
+    sessionControllerProvider.select(
+      (value) => (value.user?.id, value.user?.activeHouseholdId),
+    ),
   );
-  if (id == null) return null;
+  if (userId == null || id == null) return null;
   return (await ref.watch(householdRepositoryProvider).detail(id)).valueOrThrow;
 }

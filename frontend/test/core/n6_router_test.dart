@@ -105,7 +105,11 @@ void main() {
       expect(find.text(HouseholdStrings.you), findsOneWidget);
       expect(find.text(HouseholdStrings.roleAdmin), findsOneWidget);
       expect(find.text(HouseholdStrings.member), findsOneWidget);
-      expect(find.byType(PopupMenuButton<MemberAction>), findsNothing);
+      expect(find.byType(PopupMenuButton<MemberAction>), findsOneWidget);
+      expect(
+        tester.widgetList<MemberTile>(find.byType(MemberTile)).first.onAction,
+        isNull,
+      );
       expect(
         find.descendant(
           of: find.byType(StepHeader),

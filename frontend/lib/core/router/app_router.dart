@@ -16,6 +16,7 @@ import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/households/presentation/screens/home_placeholder_screen.dart';
 import '../../features/households/presentation/screens/household_choice_screen.dart';
 import '../../features/households/presentation/screens/household_create_screen.dart';
+import '../../features/households/presentation/screens/household_edit_screen.dart';
 import '../../features/households/presentation/screens/household_invite_screen.dart';
 import '../../features/households/presentation/screens/household_join_screen.dart';
 import '../../features/households/presentation/screens/household_settings_screen.dart';
@@ -92,6 +93,14 @@ GoRouter appRouter(Ref ref) {
     RouteNames.profileEdit: (
       '/households/:householdId/profile/edit',
       AppStrings.profile,
+    ),
+    RouteNames.householdEdit: (
+      '/households/:householdId/settings/edit',
+      AppStrings.home,
+    ),
+    RouteNames.settingsInvite: (
+      '/households/:householdId/settings/invite',
+      AppStrings.home,
     ),
   };
   final router = GoRouter(
@@ -192,6 +201,13 @@ GoRouter appRouter(Ref ref) {
               ),
               RouteNames.profileEdit => ProfileEditScreen(
                 householdId: state.pathParameters['householdId']!,
+              ),
+              RouteNames.householdEdit => HouseholdEditScreen(
+                householdId: state.pathParameters['householdId']!,
+              ),
+              RouteNames.settingsInvite => HouseholdInviteScreen(
+                householdId: state.pathParameters['householdId']!,
+                settingsMode: true,
               ),
               _ => AppScaffold(
                 header: StepHeader(title: entry.value.$2),

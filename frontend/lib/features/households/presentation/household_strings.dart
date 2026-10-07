@@ -152,6 +152,12 @@ abstract final class HouseholdStrings {
   static const accountIdentitySaved =
       'El nombre y el personaje de tu cuenta están guardados. Falta guardar el apodo de este hogar.';
   static const saveChanges = 'Guardar cambios';
+  static const editHousehold = 'Editar hogar';
+  static const done = 'Volver al hogar';
+  static const historyPreserved =
+      'Su historial se conserva como antiguo integrante.';
+  static const invitationRevocation =
+      'El código caduca en 7 días. Regenerarlo invalida el código anterior.';
   static const activeHousehold = 'Hogar activo';
   static const switchHousehold = 'Cambiar a este hogar';
   static const noActiveHousehold =
