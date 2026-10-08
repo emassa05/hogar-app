@@ -8,18 +8,18 @@ import '../../../../core/errors/api_error_code.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/session/session_controller.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_icon.dart';
 import '../../../../core/widgets/avatar_circle.dart';
+import '../../../../core/widgets/section_label.dart';
 import '../../../capacity/presentation/capacity_strings.dart';
 import '../../../notifications/presentation/notification_strings.dart';
 import '../../domain/household_entities.dart';
 import '../household_controller.dart';
 import '../household_strings.dart';
 import '../widgets/household_layout.dart';
+import '../widgets/household_settings_row.dart';
 import '../widgets/member_tile.dart';
 
 class HouseholdSettingsScreen extends ConsumerWidget {
@@ -206,45 +206,25 @@ class HouseholdSettingsScreen extends ConsumerWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              OptionCard(
-                icon: AppIcons.home,
-                iconBackground: AppColors.brandSubtle,
-                iconColor: AppColors.iconBrand,
-                title: value?.name ?? HouseholdStrings.myHouseholds,
-                description: value == null
-                    ? HouseholdStrings.noActiveHousehold
-                    : HouseholdStrings.memberCount(value.members.length),
-                onPressed: flow.busy
-                    ? null
-                    : () => context.pushNamed(RouteNames.householdSwitch),
-              ),
-              const SizedBox(height: 16),
-              SecondaryButton(
-                label: NotificationStrings.entry,
-                onPressed: flow.busy
-                    ? null
-                    : () => context.pushNamed(RouteNames.notificationSettings),
-              ),
-              if (value != null) ...[
-                const SizedBox(height: 16),
-                OptionCard(
-                  icon: AppIcons.handHeart,
-                  iconBackground: AppColors.brandSubtle,
-                  iconColor: AppColors.iconBrand,
-                  title: CapacityStrings.entry,
-                  description: CapacityStrings.entryHelp,
+              AppCard(
+                padding: EdgeInsets.zero,
+                child: HouseholdSettingsRow(
+                  icon: AppIcons.home,
+                  title: value?.name ?? HouseholdStrings.myHouseholds,
+                  description: value == null
+                      ? HouseholdStrings.noActiveHousehold
+                      : HouseholdStrings.memberCount(value.members.length),
                   onPressed: flow.busy
                       ? null
-                      : () => context.pushNamed(
-                          RouteNames.capacity,
-                          pathParameters: {'householdId': value.id},
-                        ),
+                      : () => context.pushNamed(RouteNames.householdSwitch),
                 ),
-                const SizedBox(height: 16),
-                Text(
+              ),
+              const SizedBox(height: 16),
+              if (value != null) ...[
+                SectionLabel(
                   key: membersKey,
-                  HouseholdStrings.members,
-                  style: AppTypography.titleMedium,
+                  label: HouseholdStrings.members,
+                  count: value.members.length,
                 ),
                 const SizedBox(height: 16),
                 if (value.members.isEmpty)
@@ -254,6 +234,7 @@ class HouseholdSettingsScreen extends ConsumerWidget {
                   MemberTile(
                     member: member,
                     index: index,
+                    showCharacter: true,
                     canRemove: !member.isMe,
                     canChangeRole:
                         !member.isMe ||
@@ -289,28 +270,70 @@ class HouseholdSettingsScreen extends ConsumerWidget {
                           ),
                   ),
                 ],
-                if (value.myRole == MemberRole.admin) ...[
-                  const SizedBox(height: 16),
-                  SecondaryButton(
-                    label: HouseholdStrings.editHousehold,
-                    onPressed: flow.busy
-                        ? null
-                        : () => context.pushNamed(
-                            RouteNames.householdEdit,
-                            pathParameters: {'householdId': value.id},
-                          ),
-                  ),
-                  const SizedBox(height: 12),
-                  SecondaryButton(
-                    label: HouseholdStrings.invite,
-                    onPressed: flow.busy
-                        ? null
-                        : () => context.pushNamed(
-                            RouteNames.settingsInvite,
-                            pathParameters: {'householdId': value.id},
-                          ),
-                  ),
-                ],
+              ],
+              const SizedBox(height: 16),
+              AppCard(
+                padding: EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    HouseholdSettingsRow(
+                      title: NotificationStrings.entry,
+                      icon: AppIcons.alertCircle,
+                      onPressed: flow.busy
+                          ? null
+                          : () => context.pushNamed(
+                              RouteNames.notificationSettings,
+                            ),
+                    ),
+                    if (value != null) ...[
+                      const Divider(height: 1),
+                      HouseholdSettingsRow(
+                        title: CapacityStrings.entry,
+                        icon: AppIcons.handHeart,
+                        onPressed: flow.busy
+                            ? null
+                            : () => context.pushNamed(
+                                RouteNames.capacity,
+                                pathParameters: {'householdId': value.id},
+                              ),
+                      ),
+                    ],
+                    if (value?.myRole == MemberRole.admin) ...[
+                      const Divider(height: 1),
+                      HouseholdSettingsRow(
+                        title: HouseholdStrings.editHousehold,
+                        icon: AppIcons.home,
+                        onPressed: flow.busy
+                            ? null
+                            : () => context.pushNamed(
+                                RouteNames.householdEdit,
+                                pathParameters: {'householdId': value!.id},
+                              ),
+                      ),
+                      const Divider(height: 1),
+                      HouseholdSettingsRow(
+                        title: HouseholdStrings.invite,
+                        icon: AppIcons.plus,
+                        onPressed: flow.busy
+                            ? null
+                            : () => context.pushNamed(
+                                RouteNames.settingsInvite,
+                                pathParameters: {'householdId': value!.id},
+                              ),
+                      ),
+                    ],
+                    const Divider(height: 1),
+                    HouseholdSettingsRow(
+                      title: HouseholdStrings.myHouseholds,
+                      icon: AppIcons.building,
+                      onPressed: flow.busy
+                          ? null
+                          : () => context.pushNamed(RouteNames.householdSwitch),
+                    ),
+                  ],
+                ),
+              ),
+              if (value != null) ...[
                 const SizedBox(height: 24),
                 const Text(
                   HouseholdStrings.sensitiveArea,

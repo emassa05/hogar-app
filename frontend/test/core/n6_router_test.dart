@@ -6,14 +6,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hogar_app/core/router/app_router.dart';
 import 'package:hogar_app/core/session/session_controller.dart';
+import 'package:hogar_app/core/session/session_user.dart';
+import 'package:hogar_app/core/theme/app_colors.dart';
 import 'package:hogar_app/core/theme/app_theme.dart';
 import 'package:hogar_app/core/widgets/app_buttons.dart';
+import 'package:hogar_app/core/widgets/app_card.dart';
 import 'package:hogar_app/core/widgets/avatar_circle.dart';
 import 'package:hogar_app/core/widgets/error_banner.dart';
+import 'package:hogar_app/core/widgets/section_label.dart';
 import 'package:hogar_app/core/widgets/step_header.dart';
+import 'package:hogar_app/features/capacity/presentation/capacity_strings.dart';
+import 'package:hogar_app/features/households/domain/household_entities.dart';
 import 'package:hogar_app/features/households/presentation/household_controller.dart';
 import 'package:hogar_app/features/households/presentation/household_strings.dart';
+import 'package:hogar_app/features/households/presentation/widgets/household_settings_row.dart';
 import 'package:hogar_app/features/households/presentation/widgets/member_tile.dart';
+import 'package:hogar_app/features/notifications/presentation/notification_strings.dart';
 
 import '../support/fake_http_adapter.dart';
 import '../support/n2_fixtures.dart';
@@ -121,7 +129,27 @@ void main() {
       expect(screen.location, '/households/switch');
       expect(find.text('Perteneces a 2 hogares'), findsOneWidget);
       expect(find.text(HouseholdStrings.profileLocal), findsOneWidget);
-      await tapText(tester, HouseholdStrings.switchHousehold);
+      final activeCard = find.ancestor(
+        of: find.text('Casa Los Robles'),
+        matching: find.byType(AppCard),
+      );
+      expect(tester.widget<AppCard>(activeCard).borderColor, AppColors.brand);
+      expect(
+        tester
+            .widget<Semantics>(
+              find.ancestor(
+                of: activeCard,
+                matching: find.byWidgetPredicate(
+                  (widget) =>
+                      widget is Semantics && widget.properties.selected == true,
+                ),
+              ),
+            )
+            .properties
+            .selected,
+        isTrue,
+      );
+      await tapText(tester, 'Casa del Mar');
       expect(screen.location, '/households/switch');
       expect(find.byType(LinearProgressIndicator), findsOneWidget);
       final request = screen.harness.adapter.requests.last;
@@ -139,6 +167,12 @@ void main() {
         tester
             .widgetList<SecondaryButton>(find.byType(SecondaryButton))
             .every((button) => button.onPressed == null),
+        isTrue,
+      );
+      expect(
+        tester
+            .widgetList<HouseholdSettingsRow>(find.byType(HouseholdSettingsRow))
+            .every((row) => row.onPressed == null),
         isTrue,
       );
       patch.complete(jsonResponse(userJson(householdId: 'household-2')));
@@ -259,7 +293,13 @@ void main() {
       if (request.path == '/households/household-2') return response.future;
       return householdResponse(request);
     });
-    expect(find.byType(AvatarCircle), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(StepHeader),
+        matching: find.byType(AvatarCircle),
+      ),
+      findsOneWidget,
+    );
     screen.harness.container
         .read(sessionControllerProvider.notifier)
         .confirmUser(
@@ -277,7 +317,13 @@ void main() {
     await settle(tester);
     expect(find.text('Casa del Mar'), findsOneWidget);
     expect(find.byType(MemberTile), findsOneWidget);
-    expect(find.byType(AvatarCircle), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(StepHeader),
+        matching: find.byType(AvatarCircle),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets(
@@ -406,4 +452,106 @@ void main() {
       expect(find.text('Casa Los Robles'), findsNothing);
     },
   );
+  testWidgets(
+    'members precede compact settings and backed characters fall back to initials',
+    (tester) async {
+      await pumpRouter(
+        tester,
+        (request) async => jsonResponse(
+          householdJson()
+            ..['members'] = [
+              memberJson()..['avatar'] = 'pink',
+              memberJson(id: 'user-2', isMe: false, role: 'member')
+                ..['avatar'] = null,
+            ],
+        ),
+      );
+      final tiles = tester
+          .widgetList<MemberTile>(find.byType(MemberTile))
+          .toList();
+      expect(tiles.every((tile) => tile.showCharacter), isTrue);
+      expect(
+        find.descendant(
+          of: find.byType(MemberTile).first,
+          matching: find.byType(AvatarCircle),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(MemberTile).last,
+          matching: find.byType(AvatarCircle),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.text(AvatarCircle.initialsOf(tiles.last.member.displayName)),
+        findsOneWidget,
+      );
+      final label = tester.widget<SectionLabel>(find.byType(SectionLabel));
+      expect(label.count, 2);
+      final memberY = tester.getTopLeft(find.byType(MemberTile).last).dy;
+      expect(
+        memberY,
+        lessThan(tester.getTopLeft(find.text(NotificationStrings.entry)).dy),
+      );
+      expect(
+        memberY,
+        lessThan(tester.getTopLeft(find.text(CapacityStrings.entry)).dy),
+      );
+    },
+  );
+  testWidgets(
+    'N2 member tiles retain initials even when a character is backed',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MemberTile(
+              member: Member(
+                userId: 'user-1',
+                name: 'Marta',
+                nickname: null,
+                avatar: AvatarChoice.pink,
+                role: MemberRole.admin,
+                joinedAt: DateTime.utc(2026, 10, 1),
+                isMe: true,
+              ),
+              index: 0,
+            ),
+          ),
+        ),
+      );
+      expect(find.byType(AvatarCircle), findsNothing);
+      expect(find.text('M'), findsOneWidget);
+    },
+  );
+  testWidgets('late whole-card selection cannot replace a changed account', (
+    tester,
+  ) async {
+    final pending = Completer<ResponseBody>();
+    final screen = await pumpRouter(tester, (request) async {
+      if (request.path == '/users/me') return pending.future;
+      return householdResponse(request);
+    }, path: '/households/switch');
+    await tapText(tester, 'Casa del Mar');
+    final container = screen.harness.container;
+    container
+        .read(sessionControllerProvider.notifier)
+        .confirmUser(
+          container
+              .read(sessionControllerProvider)
+              .user!
+              .copyWith(id: 'new-user'),
+        );
+    await settle(tester);
+    pending.complete(jsonResponse(userJson(householdId: 'household-2')));
+    await settle(tester);
+    expect(container.read(sessionControllerProvider).user!.id, 'new-user');
+    expect(
+      container.read(sessionControllerProvider).user!.activeHouseholdId,
+      'household-1',
+    );
+    expect(screen.location, '/households/switch');
+  });
 }

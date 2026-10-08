@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hogar_app/core/session/session_controller.dart';
 import 'package:hogar_app/core/widgets/error_banner.dart';
+import 'package:hogar_app/features/capacity/presentation/capacity_strings.dart';
 import 'package:hogar_app/features/households/presentation/household_strings.dart';
 import 'package:hogar_app/features/households/presentation/widgets/member_tile.dart';
 
+import '../capacity/capacity_fixtures.dart';
 import '../core/n6_router_test.dart' show householdResponse, pumpRouter;
 import '../profile/n6_profile_edit_test.dart' show field;
 import '../support/fake_http_adapter.dart';
@@ -87,6 +89,7 @@ void main() {
       expect(find.byType(PopupMenuButton<MemberAction>), findsNothing);
       expect(find.text(HouseholdStrings.editHousehold), findsNothing);
       expect(find.text(HouseholdStrings.invite), findsNothing);
+      expect(find.text(CapacityStrings.entry), findsOneWidget);
       screen.router.go('/households/household-1/settings/edit');
       await settle(tester);
       expect(find.text(HouseholdStrings.adminHelp), findsOneWidget);
@@ -99,6 +102,36 @@ void main() {
       );
     },
   );
+  testWidgets('F8 model entry preserves the unsaved name on navigation back', (
+    tester,
+  ) async {
+    final server = CapacityServer();
+    final screen = await pumpRouter(tester, server.respond);
+    await tapText(tester, HouseholdStrings.editHousehold);
+    await tester.enterText(
+      field(HouseholdStrings.householdName),
+      'Nombre pendiente',
+    );
+    expect(find.text(CapacityStrings.distribution), findsOneWidget);
+    await tapText(tester, CapacityStrings.entry);
+    expect(screen.location, '/households/household-1/capacity');
+    await tester.tap(find.byTooltip('Volver'));
+    await settle(tester);
+    expect(screen.location, '/households/household-1/settings/edit');
+    expect(
+      tester
+          .widget<TextField>(field(HouseholdStrings.householdName))
+          .controller!
+          .text,
+      'Nombre pendiente',
+    );
+    expect(
+      screen.harness.adapter.requests.every(
+        (request) => request.method == 'GET',
+      ),
+      isTrue,
+    );
+  });
   testWidgets(
     'rename 412 keeps draft and retries only with current version at 200 percent',
     (tester) async {

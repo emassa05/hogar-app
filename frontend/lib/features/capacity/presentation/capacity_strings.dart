@@ -1,15 +1,16 @@
 abstract final class CapacityStrings {
   static const title = 'Modelo de equilibrio';
+  static const distribution = 'Reparto de la carga';
   static const entry = 'Editar carga entre integrantes';
   static const entryHelp =
       'Configura las propuestas y el reparto de capacidad.';
   static const heading = '¿Qué es un reparto justo aquí?';
   static const explanation =
-      'Un reparto justo considera la capacidad de cada integrante, no el mismo número de tareas. Cada persona propone su capacidad y un administrador aprueba el reparto completo.';
+      'Cada persona propone su capacidad. Quien administra aprueba el reparto completo.';
   static const scheduling =
-      'Las aprobaciones comienzan el lunes siguiente en la zona horaria del hogar. No modifican periodos anteriores.';
+      'Se aplica el próximo lunes en la zona horaria del hogar, sin cambiar periodos anteriores.';
   static const invalidation =
-      'Si cambia la composición del hogar, hace falta aprobar un nuevo reparto completo. No se ajustan los porcentajes automáticamente.';
+      'Si cambian los integrantes, hay que aprobar de nuevo: los porcentajes no se ajustan solos.';
   static const current = 'Reparto vigente';
   static const upcoming = 'Reparto programado';
   static const unconfigured = 'La capacidad todavía no está configurada.';
@@ -42,8 +43,9 @@ abstract final class CapacityStrings {
   static const preview = 'Previsualización del reparto esperado';
   static const former = 'Antiguo integrante';
   static String percent(int value) => '$value %';
-  static String total(int value) =>
-      'Suma $value %. El reparto debe sumar 100 %.';
+  static String total(int value) => value == 100
+      ? 'El reparto suma 100 %. Listo para aprobar.'
+      : 'Suma $value %. El reparto debe sumar 100 %.';
   static String effective(String date) => 'Inicio previsto: $date';
   static String approver(String name) => 'Aprobado por $name';
   static String approvedAt(String time) => 'Aprobación: $time UTC';

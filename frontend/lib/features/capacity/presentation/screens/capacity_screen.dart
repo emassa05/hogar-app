@@ -20,6 +20,14 @@ import '../capacity_state.dart';
 import '../capacity_strings.dart';
 import '../widgets/capacity_distribution_card.dart';
 
+void _back(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.goNamed(RouteNames.householdSettings);
+  }
+}
+
 class CapacityScreen extends ConsumerWidget {
   const CapacityScreen({required this.householdId, super.key});
   final String householdId;
@@ -30,7 +38,7 @@ class CapacityScreen extends ConsumerWidget {
     if (user?.activeHouseholdId != householdId) {
       return HouseholdLayout(
         title: CapacityStrings.title,
-        onBack: () => context.goNamed(RouteNames.householdSettings),
+        onBack: () => _back(context),
         child: const Text(CapacityStrings.unavailable),
       );
     }
@@ -41,7 +49,7 @@ class CapacityScreen extends ConsumerWidget {
       skipLoadingOnRefresh: false,
       loading: () => HouseholdLayout(
         title: CapacityStrings.title,
-        onBack: () => context.goNamed(RouteNames.householdSettings),
+        onBack: () => _back(context),
         child: LoadPlaceholder(
           error: null,
           onRetry: () =>
@@ -50,7 +58,7 @@ class CapacityScreen extends ConsumerWidget {
       ),
       error: (error, _) => HouseholdLayout(
         title: CapacityStrings.title,
-        onBack: () => context.goNamed(RouteNames.householdSettings),
+        onBack: () => _back(context),
         child: LoadPlaceholder(
           error: asAppException(error),
           onRetry: () =>
@@ -170,7 +178,7 @@ class _CapacityContentState extends ConsumerState<_CapacityContent> {
     return HouseholdLayout(
       title: CapacityStrings.title,
       busy: state.busy,
-      onBack: () => context.goNamed(RouteNames.householdSettings),
+      onBack: () => _back(context),
       footer: own == null
           ? null
           : PrimaryButton(
@@ -184,21 +192,21 @@ class _CapacityContentState extends ConsumerState<_CapacityContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const ScreenIntro(
-            title: CapacityStrings.heading,
-            body: CapacityStrings.explanation,
+          const Text(
+            CapacityStrings.explanation,
+            style: AppTypography.bodySmall,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 8),
           const Text(
             CapacityStrings.scheduling,
             style: AppTypography.bodySmall,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           const Text(
             CapacityStrings.invalidation,
             style: AppTypography.bodySmall,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           if (overview.current case final current?)
             CapacityDistributionCard(
               title: CapacityStrings.current,
@@ -233,6 +241,7 @@ class _CapacityContentState extends ConsumerState<_CapacityContent> {
                 label:
                     '${proposal.member.displayName}. ${CapacityStrings.ownProposal}',
                 child: CapacityCard(
+                  compact: true,
                   key: const ValueKey('own-capacity'),
                   value: _proposal,
                   title: CapacityStrings.ownProposal,
@@ -249,6 +258,7 @@ class _CapacityContentState extends ConsumerState<_CapacityContent> {
               )
             else
               AppCard(
+                padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
                     AvatarCircle(
@@ -277,7 +287,7 @@ class _CapacityContentState extends ConsumerState<_CapacityContent> {
                   ],
                 ),
               ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 10),
           ],
           if (_proposal == 0 ||
               overview.proposals.any(
@@ -303,6 +313,7 @@ class _CapacityContentState extends ConsumerState<_CapacityContent> {
                 label:
                     '${CapacityStrings.approval}. ${proposal.member.displayName}',
                 child: CapacityCard(
+                  compact: true,
                   key: ValueKey('approval-${proposal.member.userId}'),
                   title: proposal.member.displayName,
                   leading: AvatarCircle(
@@ -319,7 +330,7 @@ class _CapacityContentState extends ConsumerState<_CapacityContent> {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 10),
             ],
             InfoBanner(
               message: CapacityStrings.total(total),

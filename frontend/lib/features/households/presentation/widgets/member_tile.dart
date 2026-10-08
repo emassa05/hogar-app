@@ -40,6 +40,7 @@ class MemberTile extends StatelessWidget {
     this.onPressed,
     this.canRemove = true,
     this.canChangeRole = true,
+    this.showCharacter = false,
     super.key,
   });
   final Member member;
@@ -48,6 +49,7 @@ class MemberTile extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool canRemove;
   final bool canChangeRole;
+  final bool showCharacter;
 
   @override
   Widget build(BuildContext context) {
@@ -70,27 +72,34 @@ class MemberTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              MergeSemantics(
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: background,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: border, width: 1.5),
-                  ),
-                  child: ExcludeSemantics(
-                    child: Text(
-                      AvatarCircle.initialsOf(member.displayName),
-                      textScaler: TextScaler.noScaling,
-                      style: AppTypography.labelMedium.copyWith(
-                        color: foreground,
+              if (showCharacter && member.avatar != null)
+                AvatarCircle(
+                  avatar: member.avatar,
+                  name: member.displayName,
+                  size: 36,
+                )
+              else
+                MergeSemantics(
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: background,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: border, width: 1.5),
+                    ),
+                    child: ExcludeSemantics(
+                      child: Text(
+                        AvatarCircle.initialsOf(member.displayName),
+                        textScaler: TextScaler.noScaling,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: foreground,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
               const SizedBox(width: 12),
               Expanded(
                 child: MergeSemantics(

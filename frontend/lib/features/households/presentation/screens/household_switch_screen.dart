@@ -10,11 +10,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_icon.dart';
 import '../../../../core/widgets/error_banner.dart';
 import '../../../../core/widgets/info_banner.dart';
 import '../household_controller.dart';
 import '../household_strings.dart';
 import '../widgets/household_layout.dart';
+import '../widgets/household_settings_row.dart';
 
 class HouseholdSwitchScreen extends ConsumerWidget {
   const HouseholdSwitchScreen({super.key});
@@ -105,35 +107,26 @@ class HouseholdSwitchScreen extends ConsumerWidget {
                   Semantics(
                     selected: household.id == activeId,
                     child: AppCard(
+                      padding: EdgeInsets.zero,
                       borderColor: household.id == activeId
                           ? AppColors.brand
                           : AppColors.border,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            household.name,
-                            style: AppTypography.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            HouseholdStrings.memberCount(household.memberCount),
-                            style: AppTypography.bodySmall,
-                          ),
-                          const SizedBox(height: 12),
-                          SecondaryButton(
-                            label: household.id == activeId
-                                ? HouseholdStrings.activeHousehold
-                                : HouseholdStrings.switchHousehold,
-                            onPressed: flow.busy
-                                ? null
-                                : () => household.id == activeId
-                                      ? context.goNamed(
-                                          RouteNames.householdSettings,
-                                        )
-                                      : _select(context, ref, household.id),
-                          ),
-                        ],
+                      child: HouseholdSettingsRow(
+                        title: household.name,
+                        icon: AppIcons.home,
+                        description: HouseholdStrings.memberCount(
+                          household.memberCount,
+                        ),
+                        supportingText: household.id == activeId
+                            ? HouseholdStrings.activeHousehold
+                            : HouseholdStrings.switchHousehold,
+                        onPressed: flow.busy
+                            ? null
+                            : () => household.id == activeId
+                                  ? context.goNamed(
+                                      RouteNames.householdSettings,
+                                    )
+                                  : _select(context, ref, household.id),
                       ),
                     ),
                   ),

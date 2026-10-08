@@ -17,6 +17,7 @@ class CapacityCard extends StatelessWidget {
     this.helpText = HouseholdStrings.capacityHelp,
     this.leading,
     this.divisions = 20,
+    this.compact = false,
     super.key,
   });
   final int? value;
@@ -27,6 +28,7 @@ class CapacityCard extends StatelessWidget {
   final String? helpText;
   final Widget? leading;
   final int divisions;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,7 @@ class CapacityCard extends StatelessWidget {
         ? HouseholdStrings.capacityUnset
         : HouseholdStrings.percent(value!);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(compact ? 12 : 16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.large),
@@ -52,7 +54,9 @@ class CapacityCard extends StatelessWidget {
                 child: Text(
                   label,
                   textAlign: TextAlign.end,
-                  style: AppTypography.metric,
+                  style: compact
+                      ? AppTypography.titleSmall
+                      : AppTypography.metric,
                 ),
               ),
             ],
@@ -81,19 +85,20 @@ class CapacityCard extends StatelessWidget {
               onChanged: enabled ? (next) => onChanged(next.round()) : null,
             ),
           ),
-          const ExcludeSemantics(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    HouseholdStrings.less,
-                    style: AppTypography.caption,
+          if (!compact)
+            const ExcludeSemantics(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      HouseholdStrings.less,
+                      style: AppTypography.caption,
+                    ),
                   ),
-                ),
-                Text(HouseholdStrings.more, style: AppTypography.caption),
-              ],
+                  Text(HouseholdStrings.more, style: AppTypography.caption),
+                ],
+              ),
             ),
-          ),
           if (helpText != null) ...[
             const SizedBox(height: 14),
             Text(

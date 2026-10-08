@@ -19,6 +19,7 @@ class CapacityDistributionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppCard(
+    padding: const EdgeInsets.all(12),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -32,8 +33,6 @@ class CapacityDistributionCard extends StatelessWidget {
           style: AppTypography.bodySmall,
         ),
         const SizedBox(height: 8),
-        Text(CapacityStrings.preview, style: AppTypography.caption),
-        const SizedBox(height: 12),
         ExcludeSemantics(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
@@ -59,13 +58,13 @@ class CapacityDistributionCard extends StatelessWidget {
         const SizedBox(height: 12),
         for (final allocation in distribution.allocations) ...[
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
                 AvatarCircle(
                   avatar: allocation.member.avatar,
                   name: allocation.member.displayName,
-                  size: 32,
+                  size: 24,
                 ),
                 const SizedBox(width: 10),
                 Expanded(

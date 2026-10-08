@@ -8,6 +8,7 @@ import 'package:hogar_app/core/widgets/app_buttons.dart';
 import 'package:hogar_app/core/widgets/error_banner.dart';
 import 'package:hogar_app/features/capacity/presentation/capacity_strings.dart';
 import 'package:hogar_app/features/capacity/presentation/widgets/capacity_distribution_card.dart';
+import 'package:hogar_app/features/households/presentation/household_strings.dart';
 import 'package:hogar_app/features/profile/presentation/widgets/capacity_card.dart';
 
 import '../core/n6_router_test.dart' show pumpRouter;
@@ -41,7 +42,7 @@ void main() {
       expect(screen.location, '/households/settings');
     },
   );
-  testWidgets('F8 entry opens F9 and members edit only own proposal', (
+  testWidgets('F3 entry opens F9 and members edit only own proposal', (
     tester,
   ) async {
     final server = CapacityServer()
@@ -55,6 +56,12 @@ void main() {
     expect(find.byType(CapacityCard), findsOneWidget);
     expect(find.text(CapacityStrings.approve), findsNothing);
     expect(find.byType(Slider), findsOneWidget);
+    expect(
+      tester.widget<CapacityCard>(find.byType(CapacityCard)).compact,
+      isTrue,
+    );
+    expect(find.text(HouseholdStrings.capacityUnset), findsOneWidget);
+    expect(find.text('70 %'), findsOneWidget);
     setCapacity(tester, 'own-capacity', 27);
     await tester.pump();
     await tapText(tester, CapacityStrings.saveProposal);
@@ -92,12 +99,18 @@ void main() {
           .widgetList<PrimaryButton>(find.byType(PrimaryButton))
           .firstWhere((value) => value.label == CapacityStrings.approve);
       expect(approve.onPressed, isNull);
+      expect(find.text(CapacityStrings.total(90)), findsOneWidget);
       setCapacity(tester, 'approval-user-2', 60);
       await tester.pump();
       approve = tester
           .widgetList<PrimaryButton>(find.byType(PrimaryButton))
           .firstWhere((value) => value.label == CapacityStrings.approve);
       expect(approve.onPressed, isNotNull);
+      expect(find.text(CapacityStrings.total(100)), findsOneWidget);
+      expect(
+        find.text('Suma 100 %. El reparto debe sumar 100 %.'),
+        findsNothing,
+      );
       await tapText(tester, CapacityStrings.approve);
       expect(find.text(CapacityStrings.upcoming), findsOneWidget);
       expect(
@@ -123,8 +136,57 @@ void main() {
       );
       expect(cards.first.distribution.allocations.first.percent, 20);
       expect(cards.last.distribution.allocations.first.percent, 40);
+      expect(
+        find.text(CapacityStrings.effective('2026-10-12')),
+        findsOneWidget,
+      );
+      expect(find.text(CapacityStrings.approver('Marta')), findsNWidgets(2));
     },
   );
+  testWidgets(
+    'compact readonly proposals distinguish unset capacity from zero',
+    (tester) async {
+      final server = CapacityServer()
+        ..role = 'member'
+        ..own = null
+        ..other = null;
+      final screen = await pumpRouter(
+        tester,
+        server.respond,
+        path: '/households/household-1/capacity',
+        scale: 2,
+      );
+      expect(find.text(HouseholdStrings.capacityUnset), findsOneWidget);
+      expect(find.text(CapacityStrings.unset), findsOneWidget);
+      expect(find.text('0 %'), findsNothing);
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text(CapacityStrings.approve), findsNothing);
+      expect(
+        screen.harness.adapter.requests.every(
+          (request) => request.method == 'GET',
+        ),
+        isTrue,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets('N2 capacity card default keeps its explanatory scale', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: CapacityCard(value: 35, onChanged: (_) {})),
+      ),
+    );
+    expect(
+      tester.widget<CapacityCard>(find.byType(CapacityCard)).compact,
+      isFalse,
+    );
+    expect(find.text(HouseholdStrings.less), findsOneWidget);
+    expect(find.text(HouseholdStrings.more), findsOneWidget);
+    expect(find.text(HouseholdStrings.capacityHelp), findsOneWidget);
+    expect(tester.widget<Slider>(find.byType(Slider)).divisions, 20);
+  });
   testWidgets(
     'loading failure retries without fake data and history has empty paginated states',
     (tester) async {

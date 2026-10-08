@@ -9,12 +9,17 @@ import '../../../../core/router/route_names.dart';
 import '../../../../core/session/session_controller.dart';
 import '../../../../core/validation/validators.dart';
 import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_icon.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/deadline_builder.dart';
+import '../../../../core/widgets/section_label.dart';
+import '../../../capacity/presentation/capacity_strings.dart';
 import '../../domain/household_entities.dart';
 import '../household_controller.dart';
 import '../household_strings.dart';
 import '../widgets/household_layout.dart';
+import '../widgets/household_settings_row.dart';
 
 class HouseholdEditScreen extends ConsumerStatefulWidget {
   const HouseholdEditScreen({required this.householdId, super.key});
@@ -124,6 +129,25 @@ class _HouseholdEditScreenState extends ConsumerState<HouseholdEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   SaveFeedback(error: flow.error, savedPart: flow.savedPart),
+                  const SizedBox(height: 24),
+                  const SectionLabel(label: CapacityStrings.distribution),
+                  const SizedBox(height: 12),
+                  AppCard(
+                    padding: EdgeInsets.zero,
+                    child: HouseholdSettingsRow(
+                      title: CapacityStrings.entry,
+                      description: CapacityStrings.entryHelp,
+                      icon: AppIcons.handHeart,
+                      onPressed: flow.busy
+                          ? null
+                          : () => context.pushNamed(
+                              RouteNames.capacity,
+                              pathParameters: {
+                                'householdId': widget.householdId,
+                              },
+                            ),
+                    ),
+                  ),
                 ],
               ),
             ),
