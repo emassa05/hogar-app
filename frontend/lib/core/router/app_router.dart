@@ -22,6 +22,7 @@ import '../../features/households/presentation/screens/household_invite_screen.d
 import '../../features/households/presentation/screens/household_join_screen.dart';
 import '../../features/households/presentation/screens/household_settings_screen.dart';
 import '../../features/households/presentation/screens/household_switch_screen.dart';
+import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 import '../../features/profile/presentation/screens/availability_screen.dart';
 import '../../features/profile/presentation/screens/member_profile_screen.dart';
 import '../../features/profile/presentation/screens/preferences_screen.dart';
@@ -44,6 +45,10 @@ GoRouter appRouter(Ref ref) {
   ref.listen(sessionControllerProvider, (previous, next) => refresh.update());
   ref.listen(authControllerProvider, (previous, next) => refresh.update());
   final routes = <String, (String, String)>{
+    RouteNames.notificationSettings: (
+      '/households/settings/notifications',
+      AppStrings.home,
+    ),
     RouteNames.capacity: ('/households/:householdId/capacity', AppStrings.home),
     RouteNames.welcome: ('/', AppStrings.appName),
     RouteNames.registerPhone: ('/register/phone', AppStrings.register),
@@ -163,6 +168,8 @@ GoRouter appRouter(Ref ref) {
             name: entry.key,
             path: entry.value.$1,
             builder: (context, state) => switch (entry.key) {
+              RouteNames.notificationSettings =>
+                const NotificationSettingsScreen(),
               RouteNames.capacity => CapacityScreen(
                 householdId: state.pathParameters['householdId']!,
               ),

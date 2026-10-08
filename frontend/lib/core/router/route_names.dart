@@ -26,4 +26,5 @@ abstract final class RouteNames {
   static const settingsInvite = 'settings-invite';
   static const home = 'home';
   static const capacity = 'capacity';
+  static const notificationSettings = 'notification-settings';
 }

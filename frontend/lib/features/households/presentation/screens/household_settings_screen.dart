@@ -15,6 +15,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_icon.dart';
 import '../../../../core/widgets/avatar_circle.dart';
 import '../../../capacity/presentation/capacity_strings.dart';
+import '../../../notifications/presentation/notification_strings.dart';
 import '../../domain/household_entities.dart';
 import '../household_controller.dart';
 import '../household_strings.dart';
@@ -216,6 +217,13 @@ class HouseholdSettingsScreen extends ConsumerWidget {
                 onPressed: flow.busy
                     ? null
                     : () => context.pushNamed(RouteNames.householdSwitch),
+              ),
+              const SizedBox(height: 16),
+              SecondaryButton(
+                label: NotificationStrings.entry,
+                onPressed: flow.busy
+                    ? null
+                    : () => context.pushNamed(RouteNames.notificationSettings),
               ),
               if (value != null) ...[
                 const SizedBox(height: 16),
