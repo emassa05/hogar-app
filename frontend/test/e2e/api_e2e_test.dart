@@ -4,7 +4,9 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'auth_scenarios.dart';
+import 'capacity_scenarios.dart';
 import 'household_scenarios.dart';
+import 'n6_scenarios.dart';
 import 'support/api_probe.dart';
 import 'support/contract_report.dart';
 import 'support/e2e_client.dart';
@@ -53,4 +55,31 @@ void main() {
       await exerciseHouseholds(newClient(), newClient(), report);
     },
   );
+
+  group('n6', () {
+    test(
+      'backend enforces roles and independent own profile identity',
+      () async {
+        await exerciseN6Permissions(newClient(), newClient());
+      },
+    );
+    test(
+      'switching persists and leaving requires manual next selection',
+      () async {
+        await exerciseN6SwitchAndLeave(newClient(), newClient());
+      },
+    );
+    test(
+      'rf18 approves next Monday and invalidates changed membership',
+      () async {
+        await exerciseCapacity(newClient(), newClient(), newClient());
+      },
+    );
+    test(
+      'f5 reports missing n3 settings dependency, not persistence',
+      () async {
+        await exerciseMissingNotificationDependency(newClient());
+      },
+    );
+  });
 }

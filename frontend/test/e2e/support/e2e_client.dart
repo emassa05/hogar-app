@@ -14,10 +14,13 @@ import 'package:hogar_app/core/storage/token_storage.dart';
 import 'package:hogar_app/features/auth/data/auth_repository_impl.dart';
 import 'package:hogar_app/features/auth/domain/auth_entities.dart';
 import 'package:hogar_app/features/auth/domain/auth_repository.dart';
+import 'package:hogar_app/features/capacity/data/capacity_repository_impl.dart';
+import 'package:hogar_app/features/capacity/domain/capacity_repository.dart';
 import 'package:hogar_app/features/catalog/data/catalog_repository_impl.dart';
 import 'package:hogar_app/features/catalog/domain/catalog_repository.dart';
 import 'package:hogar_app/features/households/data/household_repository_impl.dart';
 import 'package:hogar_app/features/households/domain/household_repository.dart';
+import 'package:hogar_app/features/notifications/data/notification_settings_repository.dart';
 import 'package:hogar_app/features/profile/data/profile_repository_impl.dart';
 import 'package:hogar_app/features/profile/domain/profile_repository.dart';
 import 'package:hogar_app/features/templates/data/template_repository_impl.dart';
@@ -89,10 +92,14 @@ class E2eClient {
   Dio get dio => container.read(dioClientProvider);
   SessionController get session =>
       container.read(sessionControllerProvider.notifier);
+  SessionUser? get user => container.read(sessionControllerProvider).user;
   AuthRepository get auth => container.read(authRepositoryProvider);
   HouseholdRepository get households =>
       container.read(householdRepositoryProvider);
   ProfileRepository get profiles => container.read(profileRepositoryProvider);
+  CapacityRepository get capacity => container.read(capacityRepositoryProvider);
+  NotificationSettingsRepository get notificationSettings =>
+      container.read(notificationSettingsRepositoryProvider);
   CatalogRepository get catalog => container.read(catalogRepositoryProvider);
   TemplateRepository get templates =>
       container.read(templateRepositoryProvider);
