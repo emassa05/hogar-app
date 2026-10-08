@@ -67,6 +67,12 @@ abstract final class HouseholdStrings {
   static const cancel = 'Cancelar';
   static const confirm = 'Confirmar';
   static const profile = 'Mi perfil doméstico';
+  static const ownProfile = 'Mi perfil';
+  static const memberProfile = 'Perfil del integrante';
+  static String profileOf(String name) => 'Perfil de $name';
+  static const memberProfilePreview = 'Nombre en este hogar';
+  static const noRegisteredRestrictions = 'No hay restricciones registradas.';
+  static const character = 'Personaje';
   static const accountAvatar = 'Tu personaje te identifica en toda la app.';
   static const nickname = 'Cómo te llamamos';
   static const nicknameShort = 'Se muestra a los demás integrantes.';

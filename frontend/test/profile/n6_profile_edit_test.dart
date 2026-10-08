@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hogar_app/core/l10n/app_strings.dart';
 import 'package:hogar_app/core/session/session_controller.dart';
 import 'package:hogar_app/core/session/session_user.dart';
 import 'package:hogar_app/core/widgets/app_text_field.dart';
+import 'package:hogar_app/core/widgets/avatar_circle.dart';
 import 'package:hogar_app/core/widgets/character_picker.dart';
 import 'package:hogar_app/core/widgets/error_banner.dart';
+import 'package:hogar_app/core/widgets/section_label.dart';
 import 'package:hogar_app/features/households/presentation/household_strings.dart';
 
 import '../core/n6_router_test.dart' show householdResponse, pumpRouter;
@@ -73,6 +76,28 @@ void main() {
       );
       await tapText(tester, HouseholdStrings.editProfile);
       await enterIdentity(tester);
+      final picker = tester.widget<CharacterPicker>(
+        find.byType(CharacterPicker),
+      );
+      expect(picker.showSelectionCheck, isTrue);
+      expect(picker.label, HouseholdStrings.character);
+      expect(picker.selected, AvatarChoice.pink);
+      expect(find.text(HouseholdStrings.character), findsOneWidget);
+      expect(find.byIcon(Icons.check), findsOneWidget);
+      final selected = tester.widget<Semantics>(
+        find.descendant(
+          of: find.byType(CharacterPicker),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics && widget.properties.selected == true,
+          ),
+        ),
+      );
+      expect(
+        selected.properties.label,
+        AppStrings.character(AvatarCircle.names[AvatarChoice.pink]!),
+      );
+      expect(selected.properties.enabled, isTrue);
       expect(
         tester.widget<CharacterPicker>(find.byType(CharacterPicker)).enabled,
         isTrue,
@@ -91,6 +116,30 @@ void main() {
       expect(writes[1].path, '/households/household-1/members/me/profile');
       expect(requestBody(writes[1]), {'nickname': 'Mari'});
       expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'N1 character picker defaults keep the overline and no selection check',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CharacterPicker(
+              selected: AvatarChoice.pink,
+              onSelected: (_) {},
+            ),
+          ),
+        ),
+      );
+      expect(find.byType(OverlineDivider), findsOneWidget);
+      expect(find.byType(AvatarCircle), findsNWidgets(6));
+      expect(find.byIcon(Icons.check), findsNothing);
+      expect(
+        tester
+            .widget<CharacterPicker>(find.byType(CharacterPicker))
+            .showSelectionCheck,
+        isFalse,
+      );
     },
   );
   testWidgets(

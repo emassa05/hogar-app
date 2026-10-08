@@ -96,6 +96,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   CharacterPicker(
+                    label: HouseholdStrings.character,
+                    showSelectionCheck: true,
                     selected: _avatar,
                     enabled: !busy,
                     onSelected: (value) => setState(() => _avatar = value),

@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/route_names.dart';
 import '../../../../core/session/session_controller.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/avatar_circle.dart';
 import '../../../households/domain/household_entities.dart';
@@ -34,8 +34,16 @@ class MemberProfileScreen extends ConsumerWidget {
         (value) => value.user?.activeHouseholdId,
       ),
     );
+    final loaded =
+        profile.isLoading || profile.hasError || activeId != householdId
+        ? null
+        : profile.asData?.value;
     return HouseholdLayout(
-      title: HouseholdStrings.profile,
+      title: loaded == null
+          ? HouseholdStrings.memberProfile
+          : loaded.isMe
+          ? HouseholdStrings.ownProfile
+          : HouseholdStrings.profileOf(loaded.displayName),
       onBack: () => context.goNamed(RouteNames.householdSettings),
       child: activeId != householdId
           ? const Text(HouseholdStrings.inactiveHousehold)
@@ -53,13 +61,13 @@ class MemberProfileScreen extends ConsumerWidget {
               data: (value) => Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AppCard(
-                    child: Column(
+                  if (value.isMe)
+                    Column(
                       children: [
                         AvatarCircle(
                           avatar: value.avatar,
                           name: value.name,
-                          size: value.isMe ? 140 : 64,
+                          size: 140,
                         ),
                         const SizedBox(height: 16),
                         Text(value.name, style: AppTypography.titleLarge),
@@ -69,33 +77,76 @@ class MemberProfileScreen extends ConsumerWidget {
                               ? HouseholdStrings.roleAdmin
                               : HouseholdStrings.member,
                         ),
-                        if (value.isMe) ...[
-                          const SizedBox(height: 16),
-                          SecondaryButton(
-                            label: HouseholdStrings.editProfile,
-                            expand: false,
-                            onPressed: () => context.pushNamed(
-                              RouteNames.profileEdit,
-                              pathParameters: {'householdId': householdId},
-                            ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          label: const Text(HouseholdStrings.editProfile),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.brand,
+                            foregroundColor: AppColors.inverse,
+                            textStyle: AppTypography.buttonCompact,
+                            minimumSize: const Size(0, 48),
                           ),
-                        ],
+                          onPressed: () => context.pushNamed(
+                            RouteNames.profileEdit,
+                            pathParameters: {'householdId': householdId},
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        AvatarCircle(
+                          avatar: value.avatar,
+                          name: value.name,
+                          size: 64,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(value.name, style: AppTypography.titleLarge),
+                              const SizedBox(height: 8),
+                              Text(
+                                value.role == MemberRole.admin
+                                    ? HouseholdStrings.roleAdmin
+                                    : HouseholdStrings.member,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ),
                   const SizedBox(height: 16),
                   AppCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
                       children: [
-                        const Text(
-                          HouseholdStrings.profilePreview,
-                          style: AppTypography.titleMedium,
+                        AvatarCircle(
+                          avatar: value.avatar,
+                          name: value.displayName,
+                          size: 44,
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          value.displayName,
-                          style: AppTypography.titleLarge,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                value.isMe
+                                    ? HouseholdStrings.profilePreview
+                                    : HouseholdStrings.memberProfilePreview,
+                                style: AppTypography.caption,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                value.displayName,
+                                style: AppTypography.titleSmall,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -152,7 +203,11 @@ class MemberProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   if (value.restrictions.isEmpty)
-                    const Text(HouseholdStrings.noRestrictions),
+                    Text(
+                      value.isMe
+                          ? HouseholdStrings.noRestrictions
+                          : HouseholdStrings.noRegisteredRestrictions,
+                    ),
                   for (final restriction in value.restrictions) ...[
                     RestrictionTile(restriction: restriction),
                     const SizedBox(height: 12),

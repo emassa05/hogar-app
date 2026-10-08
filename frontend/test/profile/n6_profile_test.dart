@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hogar_app/core/session/session_controller.dart';
 import 'package:hogar_app/core/widgets/app_buttons.dart';
+import 'package:hogar_app/core/widgets/app_card.dart';
+import 'package:hogar_app/core/widgets/avatar_circle.dart';
 import 'package:hogar_app/core/widgets/error_banner.dart';
 import 'package:hogar_app/features/households/presentation/household_strings.dart';
 import 'package:hogar_app/features/profile/presentation/widgets/availability_grid.dart';
@@ -49,6 +51,48 @@ void main() {
         expect(find.byType(Slider), findsNothing);
         expect(find.byType(TextField), findsNothing);
         expect(find.byType(PrimaryButton), findsNothing);
+        expect(find.byType(FilledButton), own ? findsOneWidget : findsNothing);
+        expect(
+          find.text(
+            own
+                ? HouseholdStrings.ownProfile
+                : HouseholdStrings.profileOf('Pau'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            own
+                ? HouseholdStrings.profilePreview
+                : HouseholdStrings.memberProfilePreview,
+          ),
+          findsOneWidget,
+        );
+        final identity = find.byWidgetPredicate(
+          (widget) => widget is AvatarCircle && widget.size == (own ? 140 : 64),
+        );
+        expect(identity, findsOneWidget);
+        expect(
+          find.ancestor(of: identity, matching: find.byType(AppCard)),
+          findsNothing,
+        );
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is AvatarCircle &&
+                widget.size == 44 &&
+                widget.name == (own ? 'Marti' : 'Pau'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(own ? HouseholdStrings.roleAdmin : HouseholdStrings.member),
+          findsOneWidget,
+        );
+        expect(
+          find.text(HouseholdStrings.editProfile),
+          own ? findsOneWidget : findsNothing,
+        );
         expect(
           tester
               .widget<AvailabilityGrid>(find.byType(AvailabilityGrid))
@@ -95,6 +139,7 @@ void main() {
         return profileResponse(request);
       }, path: '/households/household-1/members/user-2/profile');
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text(HouseholdStrings.memberProfile), findsOneWidget);
       screen.router.go('/households/household-1/members/me/profile');
       await settle(tester);
       old.complete(jsonResponse(profileJson()..['name'] = 'Old foreign'));
@@ -112,6 +157,34 @@ void main() {
       await settle(tester);
       expect(find.text('Marta'), findsNothing);
       expect(find.text(HouseholdStrings.inactiveHousehold), findsOneWidget);
+    },
+  );
+  testWidgets(
+    'foreign empty restrictions use neutral ownership and nickname falls back to account name',
+    (tester) async {
+      await pumpRouter(tester, (request) async {
+        if (request.path.endsWith('/profile')) {
+          return jsonResponse(
+            profileJson()
+              ..['user_id'] = 'user-2'
+              ..['name'] = 'Iván'
+              ..['nickname'] = null
+              ..['is_me'] = false
+              ..['restrictions'] = <dynamic>[],
+          );
+        }
+        return householdResponse(request);
+      }, path: '/households/household-1/members/user-2/profile');
+      expect(find.text(HouseholdStrings.profileOf('Iván')), findsOneWidget);
+      expect(
+        find.text(HouseholdStrings.noRegisteredRestrictions),
+        findsOneWidget,
+      );
+      expect(find.text(HouseholdStrings.noRestrictions), findsNothing);
+      expect(find.text(HouseholdStrings.profilePreview), findsNothing);
+      expect(find.byType(FilledButton), findsNothing);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(Slider), findsNothing);
     },
   );
 }
