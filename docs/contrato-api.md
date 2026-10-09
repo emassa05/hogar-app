@@ -316,20 +316,20 @@ Al superar un límite, la respuesta es `429` con `Retry-After`. Los límites por
 | Salud | RNF07 | — | — | @MartinZuniga-Nane | P1 |
 | Autenticación y usuarios | Registro e inicio de sesión | N1 | @MartinZuniga-Nane | @MartinZuniga-Nane | P1 |
 | Hogares e invitaciones | RF01 | N2, N6 | @MartinZuniga-Nane, @DaniAuditore | @MartinZuniga-Nane | P1 |
-| Perfiles | RF02, RF10, RF14 | N2, N6 | @MartinZuniga-Nane | @MartinZuniga-Nane | P1–P2 |
-| Catálogo | RF03, RF14, RF17 | N2, N4 | — | @MartinZuniga-Nane | P1 |
+| Perfiles | RF02, RF10, RF14 | N2, N6 | @MartinZuniga-Nane, @DaniAuditore | @MartinZuniga-Nane | P1–P2 |
+| Catálogo | RF03, RF14, RF17 | N2, N4 | @MartinZuniga-Nane | @MartinZuniga-Nane | P1 |
 | Plantillas | RF17 | N2 | @MartinZuniga-Nane | @MartinZuniga-Nane | P3 |
-| Tareas | RF03, RF05 | N4 | @emassa05 | Por asignar | P1 |
-| Rutinas | RF04 | N4 | @emassa05 | Por asignar | P2 |
-| Imprevistos | RF12 | N4 | @emassa05 | Por asignar | P2 |
-| Comentarios | RF15 | N4 | @emassa05 | Por asignar | P2 |
-| Intercambios | RF11 | N4 | @emassa05 | Por asignar | P3 |
-| Notificaciones | RF07 | N3 | @Shtolaa | Por asignar | P2 |
-| Panel | RF09 | N3 | @Shtolaa | Por asignar | P2 |
-| Carga | RF06, RF13 | N5 | @Shtolaa | Por asignar | P2 |
-| Capacidad | RF18 | N5, N6 | @Shtolaa | Por asignar | P2 |
-| Sugerencias | RF08 | N5 | @Shtolaa | Por asignar | P3 |
-| Estadísticas e historial | RF16 | N5 | @Shtolaa | Por asignar | P3 |
+| Tareas | RF03, RF05 | N4 | @emassa05 | @emassa05 | P1 |
+| Rutinas | RF04 | N4 | @emassa05 | @emassa05 | P2 |
+| Imprevistos | RF12 | N4 | @emassa05 | @emassa05 | P2 |
+| Comentarios | RF15 | N4 | @emassa05 | @emassa05 | P2 |
+| Intercambios | RF11 | N4 | @emassa05 | @emassa05 | P3 |
+| Notificaciones | RF07 | N3 | @Shtolaa | @Shtolaa | P2 |
+| Panel | RF09 | N3 | @Shtolaa | @Shtolaa | P2 |
+| Carga | RF06, RF13 | N5 | @Shtolaa | @Shtolaa | P2 |
+| Capacidad | RF18 | N5, N6 | @Shtolaa | @Shtolaa | P2 |
+| Sugerencias | RF08 | N5 | @Shtolaa | @Shtolaa | P3 |
+| Estadísticas e historial | RF16 | N5 | @Shtolaa | @Shtolaa | P3 |
 
 ---
 
