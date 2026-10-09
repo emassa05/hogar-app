@@ -192,6 +192,8 @@ class _CapacityContentState extends ConsumerState<_CapacityContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const Text(CapacityStrings.heading, style: AppTypography.titleMedium),
+          const SizedBox(height: 8),
           const Text(
             CapacityStrings.explanation,
             style: AppTypography.bodySmall,

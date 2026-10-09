@@ -51,6 +51,7 @@ void main() {
     final screen = await pumpRouter(tester, server.respond);
     await tapText(tester, CapacityStrings.entry);
     expect(screen.location, '/households/household-1/capacity');
+    expect(find.text(CapacityStrings.heading), findsOneWidget);
     expect(find.text(CapacityStrings.unconfigured), findsOneWidget);
     expect(find.text(CapacityStrings.noUpcoming), findsOneWidget);
     expect(find.byType(CapacityCard), findsOneWidget);
